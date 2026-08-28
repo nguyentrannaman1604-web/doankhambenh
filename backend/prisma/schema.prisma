@@ -26,6 +26,12 @@ enum AppointmentStatus {
   CANCELLED
 }
 
+enum Gender {
+  MALE
+  FEMALE
+  OTHER
+}
+
 model User {
   id          Int       @id @default(autoincrement())
   name        String    @db.VarChar(100)
@@ -33,15 +39,16 @@ model User {
   password    String
   phone       String?   @db.VarChar(20)
   dateOfBirth DateTime?
-  role        UserRole  @default(PATIENT)
 
-  doctor Doctor?
+  gender Gender?
+  avatar String?
 
-  patientAppointments Appointment[] @relation("PatientAppointments")
+  role UserRole @default(PATIENT)
 
-  refreshTokens RefreshToken[]
-
-  reviews Review[] @relation("PatientReviews")
+  doctor              Doctor?
+  patientAppointments Appointment[]  @relation("PatientAppointments")
+  refreshTokens       RefreshToken[]
+  reviews             Review[]       @relation("PatientReviews")
 
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt

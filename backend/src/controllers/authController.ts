@@ -109,7 +109,11 @@ export async function getMe(
         email: true,
         phone: true,
         dateOfBirth: true,
+        gender: true,
+        avatar: true,
         role: true,
+        createdAt: true,
+        updatedAt: true,
       },
     });
 

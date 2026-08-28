@@ -10,8 +10,9 @@ import {
   createDoctor,
   updateDoctor,
   deleteDoctor,
-  
 } from "../services/doctorService.js";
+
+import { AppError } from "../types/AppError.js";
 
 export async function getAll(
   req: Request,
@@ -22,6 +23,16 @@ export async function getAll(
     const specialtyId = req.query.specialtyId
       ? Number(req.query.specialtyId)
       : undefined;
+
+    if (
+      specialtyId !== undefined &&
+      (!Number.isInteger(specialtyId) || specialtyId <= 0)
+    ) {
+      throw new AppError(
+        "specialtyId không hợp lệ",
+        400
+      );
+    }
 
     const doctors = await getDoctors(specialtyId);
 
@@ -42,6 +53,13 @@ export async function getOne(
   try {
     const id = Number(req.params.id);
 
+    if (!Number.isInteger(id) || id <= 0) {
+      throw new AppError(
+        "Doctor ID không hợp lệ",
+        400
+      );
+    }
+
     const doctor = await getDoctorById(id);
 
     return res.status(200).json({
@@ -59,7 +77,9 @@ export async function create(
   next: NextFunction
 ) {
   try {
-    const doctor = await createDoctor(req.body);
+    const doctor = await createDoctor(
+      req.body
+    );
 
     return res.status(201).json({
       success: true,
@@ -78,6 +98,13 @@ export async function update(
 ) {
   try {
     const id = Number(req.params.id);
+
+    if (!Number.isInteger(id) || id <= 0) {
+      throw new AppError(
+        "Doctor ID không hợp lệ",
+        400
+      );
+    }
 
     const doctor = await updateDoctor(
       id,
@@ -101,6 +128,13 @@ export async function remove(
 ) {
   try {
     const id = Number(req.params.id);
+
+    if (!Number.isInteger(id) || id <= 0) {
+      throw new AppError(
+        "Doctor ID không hợp lệ",
+        400
+      );
+    }
 
     await deleteDoctor(id);
 

@@ -10,12 +10,27 @@ import {
 
 import { authenticate } from "../middlewares/authMiddleware.js";
 
+import { validateBody } from "../middlewares/validateBody.js";
+
+import { registerPatientSchema } from "../schemas/patientSchema.js";
+
+import {
+  loginSchema,
+  refreshTokenSchema,
+  logoutSchema,
+} from "../schemas/authSchema.js";
+
 const router = Router();
 
-router.post("/register", register);
-router.post("/login", login);
-router.post("/refresh", refresh);
-router.post("/logout", logout);
+
+router.post("/register", validateBody(registerPatientSchema), register);
+
+router.post("/login", validateBody(loginSchema), login);
+
+router.post("/refresh", validateBody(refreshTokenSchema), refresh);
+
+router.post("/logout", validateBody(logoutSchema), logout);
+
 router.get("/me", authenticate, getMe);
 
 export default router;

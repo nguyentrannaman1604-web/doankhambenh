@@ -7,12 +7,15 @@ import {
   verifyRefreshToken,
 } from "../utils/token.js";
 
+
 interface RegisterInput {
   name: string;
   email: string;
   password: string;
   phone?: string;
   dateOfBirth?: string;
+  gender?: "MALE" | "FEMALE" | "OTHER";
+  avatar?: string;
 }
 
 interface LoginInput {
@@ -40,14 +43,24 @@ export async function registerUser(input: RegisterInput) {
       password: hashedPassword,
       phone: input.phone,
       dateOfBirth: input.dateOfBirth ? new Date(input.dateOfBirth) : null,
+
+      gender: input.gender,
+      avatar: input.avatar,
+
       role: "PATIENT",
     },
+
     select: {
       id: true,
       name: true,
       email: true,
       phone: true,
       dateOfBirth: true,
+
+     
+      gender: true,
+      avatar: true,
+
       role: true,
       createdAt: true,
     },
@@ -55,7 +68,6 @@ export async function registerUser(input: RegisterInput) {
 
   return user;
 }
-
 export async function loginUser(input: LoginInput) {
   const user = await prisma.user.findUnique({
     where: {

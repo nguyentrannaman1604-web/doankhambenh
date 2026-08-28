@@ -8,6 +8,9 @@ import doctorRoutes from "./routes/doctorRoutes.js";
 import scheduleRoutes from "./routes/scheduleRoutes.js";
 import appointmentRoutes from "./routes/appointmentRoutes.js";
 import reviewRoutes from "./routes/reviewRoutes.js";
+import statisticsRoutes from "./routes/statisticsRoutes.js";
+import profileRoutes from "./routes/profileRoutes.js";
+import doctorProfileRoutes from "./routes/doctorProfileRoutes.js";
 
 const app = express();
 
@@ -34,6 +37,9 @@ app.use("/api/v1/doctors", doctorRoutes);
 app.use("/api/v1/doctor/schedules", scheduleRoutes);
 app.use("/api/v1/appointments", appointmentRoutes);
 app.use("/api/v1/reviews", reviewRoutes);
+app.use("/api/v1/admin/statistics", statisticsRoutes);
+app.use("/api/v1/profile", profileRoutes);
+app.use("/api/v1/doctor/profile", doctorProfileRoutes);
 
 
 
