@@ -5,6 +5,9 @@ import authRoutes from "./routes/authRoutes.js";
 import { errorHandler } from "./middlewares/errorHandler.js";
 import specialtyRoutes from "./routes/specialtyRoutes.js";
 import doctorRoutes from "./routes/doctorRoutes.js";
+import scheduleRoutes from "./routes/scheduleRoutes.js";
+import appointmentRoutes from "./routes/appointmentRoutes.js";
+import reviewRoutes from "./routes/reviewRoutes.js";
 
 const app = express();
 
@@ -28,6 +31,11 @@ app.get("/api/v1/health", (req, res) => {
 app.use("/api/v1/auth", authRoutes);
 app.use("/api/v1/specialties", specialtyRoutes);
 app.use("/api/v1/doctors", doctorRoutes);
+app.use("/api/v1/doctor/schedules", scheduleRoutes);
+app.use("/api/v1/appointments", appointmentRoutes);
+app.use("/api/v1/reviews", reviewRoutes);
+
+
 
 app.use(errorHandler);
 

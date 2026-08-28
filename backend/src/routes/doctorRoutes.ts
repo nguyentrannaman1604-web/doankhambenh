@@ -9,10 +9,14 @@ import {
 } from "../controllers/doctorController.js";
 
 import { authenticate, authorize } from "../middlewares/authMiddleware.js";
+import { getAvailability } from "../controllers/availabilityController.js";
 
 const router = Router();
 
 router.get("/", getAll);
+
+router.get("/:id/availability", getAvailability);
+
 router.get("/:id", getOne);
 
 router.post("/", authenticate, authorize("ADMIN", "RECEPTIONIST"), create);
