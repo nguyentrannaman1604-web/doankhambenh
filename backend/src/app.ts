@@ -11,6 +11,7 @@ import reviewRoutes from "./routes/reviewRoutes.js";
 import statisticsRoutes from "./routes/statisticsRoutes.js";
 import profileRoutes from "./routes/profileRoutes.js";
 import doctorProfileRoutes from "./routes/doctorProfileRoutes.js";
+import aiRoutes from "./routes/aiRoutes.js";
 
 const app = express();
 
@@ -40,6 +41,7 @@ app.use("/api/v1/reviews", reviewRoutes);
 app.use("/api/v1/admin/statistics", statisticsRoutes);
 app.use("/api/v1/profile", profileRoutes);
 app.use("/api/v1/doctor/profile", doctorProfileRoutes);
+app.use("/api/v1/ai", aiRoutes);
 
 
 
