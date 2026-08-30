@@ -11,20 +11,14 @@ function minutesToTime(minutes: number) {
   const hour = Math.floor(minutes / 60);
   const minute = minutes % 60;
 
-  return `${String(hour).padStart(2, "0")}:${String(minute).padStart(
-    2,
-    "0"
-  )}`;
+  return `${String(hour).padStart(2, "0")}:${String(minute).padStart(2, "0")}`;
 }
 
 function createDateTime(date: string, time: string) {
   return new Date(`${date}T${time}:00+07:00`);
 }
 
-export async function getDoctorAvailability(
-  doctorId: number,
-  date: string
-) {
+export async function getDoctorAvailability(doctorId: number, date: string) {
   const doctor = await prisma.doctor.findUnique({
     where: {
       id: doctorId,
@@ -98,8 +92,13 @@ export async function getDoctorAvailability(
     available: boolean;
   }[] = [];
 
+  // Giờ nghỉ trưa cố định của phòng khám
+  const lunchStartMinutes = timeToMinutes("12:00");
+  const lunchEndMinutes = timeToMinutes("13:00");
+
   for (const schedule of schedules) {
     const startMinutes = timeToMinutes(schedule.startTime);
+
     const endMinutes = timeToMinutes(schedule.endTime);
 
     for (
@@ -107,26 +106,42 @@ export async function getDoctorAvailability(
       current + schedule.slotDuration <= endMinutes;
       current += schedule.slotDuration
     ) {
+      const slotEndMinutes = current + schedule.slotDuration;
+
+      // ==========================
+      // BỎ QUA GIỜ NGHỈ TRƯA
+      // 12:00 - 13:00
+      // ==========================
+
+      const overlapsLunch =
+        current < lunchEndMinutes && slotEndMinutes > lunchStartMinutes;
+
+      if (overlapsLunch) {
+        continue;
+      }
+
       const start = minutesToTime(current);
-      const end = minutesToTime(
-        current + schedule.slotDuration
-      );
+
+      const end = minutesToTime(slotEndMinutes);
 
       const slotStart = createDateTime(date, start);
+
       const slotEnd = createDateTime(date, end);
 
+      // ==========================
+      // KIỂM TRA BÁC SĨ ĐÃ CHẶN
+      // ==========================
+
       const isBlocked = blockedSlots.some((block) => {
-        return (
-          slotStart < block.endAt &&
-          slotEnd > block.startAt
-        );
+        return slotStart < block.endAt && slotEnd > block.startAt;
       });
 
+      // ==========================
+      // KIỂM TRA ĐÃ CÓ LỊCH HẸN
+      // ==========================
+
       const isBooked = appointments.some((appointment) => {
-        return (
-          slotStart < appointment.endAt &&
-          slotEnd > appointment.startAt
-        );
+        return slotStart < appointment.endAt && slotEnd > appointment.startAt;
       });
 
       slots.push({
@@ -138,7 +153,6 @@ export async function getDoctorAvailability(
       });
     }
   }
-
   return {
     doctorId,
     date,

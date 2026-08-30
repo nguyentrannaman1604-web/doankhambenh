@@ -12,6 +12,9 @@ import AdminHomePage from "./pages/admin/AdminHomePage";
 import ProtectedRoute from "./routes/ProtectedRoute";
 import MainLayout from "./layouts/MainLayout";
 import PatientProfilePage from "./pages/patient/PatientProfilePage";
+import DoctorListPage from "./pages/patient/DoctorListPage";
+import DoctorDetailPage from "./pages/patient/DoctorDetailPage";
+import MyAppointmentsPage from "./pages/patient/MyAppointmentsPage";
 
 function App() {
   const { user, isAuthenticated } = useAuth();
@@ -77,6 +80,9 @@ function App() {
       >
         <Route path="/patient" element={<PatientHomePage />} />
         <Route path="/patient/profile" element={<PatientProfilePage />} />
+        <Route path="/patient/doctors" element={<DoctorListPage />} />
+        <Route path="/patient/doctors/:id" element={<DoctorDetailPage />} />
+        <Route path="/patient/appointments" element={<MyAppointmentsPage />} />
       </Route>
 
       <Route
