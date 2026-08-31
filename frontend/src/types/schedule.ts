@@ -43,3 +43,23 @@ export interface CreateBlockedSlotResponse {
   message?: string;
   data: BlockedSlot;
 }
+
+export interface CreateDoctorScheduleInput {
+  dayOfWeek: number;
+  startTime: string;
+  endTime: string;
+  slotDuration: number;
+}
+
+export interface UpdateDoctorScheduleInput {
+  dayOfWeek?: number;
+  startTime?: string;
+  endTime?: string;
+  slotDuration?: number;
+}
+
+export interface DoctorScheduleResponse {
+  success: boolean;
+  message?: string;
+  data: DoctorSchedule;
+}

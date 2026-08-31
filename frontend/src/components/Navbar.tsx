@@ -733,7 +733,7 @@ function Navbar() {
                 px: 2,
               }}
             >
-              MENU
+              
             </Typography>
 
             <List>
