@@ -15,6 +15,13 @@ import PatientProfilePage from "./pages/patient/PatientProfilePage";
 import DoctorListPage from "./pages/patient/DoctorListPage";
 import DoctorDetailPage from "./pages/patient/DoctorDetailPage";
 import MyAppointmentsPage from "./pages/patient/MyAppointmentsPage";
+import AiSuggestionPage from "./pages/patient/AiSuggestionPage";
+import DoctorSchedulePage from "./pages/doctor/DoctorSchedulePage";
+import DoctorPatientsTodayPage from "./pages/doctor/DoctorPatientsTodayPage";
+import AdminAppointmentsPage from "./pages/admin/AdminAppointmentsPage";
+import AdminDoctorsPage from "./pages/admin/AdminDoctorsPage";
+import AdminSpecialtiesPage from "./pages/admin/AdminSpecialtiesPage";
+import AdminStatisticsPage from "./pages/admin/AdminStatisticsPage";
 
 function App() {
   const { user, isAuthenticated } = useAuth();
@@ -83,6 +90,7 @@ function App() {
         <Route path="/patient/doctors" element={<DoctorListPage />} />
         <Route path="/patient/doctors/:id" element={<DoctorDetailPage />} />
         <Route path="/patient/appointments" element={<MyAppointmentsPage />} />
+        <Route path="/patient/ai-suggestion" element={<AiSuggestionPage />} />
       </Route>
 
       <Route
@@ -93,6 +101,11 @@ function App() {
         }
       >
         <Route path="/doctor" element={<DoctorHomePage />} />
+        <Route path="/doctor/schedules" element={<DoctorSchedulePage />} />
+        <Route
+          path="/doctor/patients-today"
+          element={<DoctorPatientsTodayPage />}
+        />
       </Route>
 
       <Route
@@ -103,6 +116,10 @@ function App() {
         }
       >
         <Route path="/admin" element={<AdminHomePage />} />
+        <Route path="/admin/appointments" element={<AdminAppointmentsPage />} />
+        <Route path="/admin/doctors" element={<AdminDoctorsPage />} />
+        <Route path="/admin/specialties" element={<AdminSpecialtiesPage />} />
+        <Route path="/admin/statistics" element={<AdminStatisticsPage />} />
       </Route>
 
       <Route path="*" element={<Navigate to="/" replace />} />

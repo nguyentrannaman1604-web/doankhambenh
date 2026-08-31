@@ -12,6 +12,8 @@ import {
   Paper,
   TextField,
   Typography,
+  Rating,
+  Chip,
 } from "@mui/material";
 
 import dayjs from "dayjs";
@@ -24,6 +26,10 @@ import {
 } from "../../services/doctorService";
 
 import { createAppointment } from "../../services/appointmentService";
+
+import type { Review } from "../../types/review";
+
+import { getDoctorReviews } from "../../services/reviewService";
 
 function DoctorDetailPage() {
   const { id } = useParams();
@@ -49,6 +55,10 @@ function DoctorDetailPage() {
   const [bookingSuccess, setBookingSuccess] = useState("");
 
   const [bookingError, setBookingError] = useState("");
+
+  const [reviews, setReviews] = useState<Review[]>([]);
+
+  const [reviewLoading, setReviewLoading] = useState(false);
 
   useEffect(() => {
     const loadDoctor = async () => {
@@ -137,6 +147,26 @@ function DoctorDetailPage() {
     }
   };
 
+  const loadReviews = async (doctorId: number) => {
+    try {
+      setReviewLoading(true);
+
+      const response = await getDoctorReviews(doctorId);
+
+      setReviews(response.data);
+    } catch (error) {
+      console.error("Load reviews:", error);
+    } finally {
+      setReviewLoading(false);
+    }
+  };
+
+  useEffect(() => {
+    if (Number.isInteger(doctorId) && doctorId > 0) {
+      loadReviews(doctorId);
+    }
+  }, [doctorId]);
+
   if (loading) {
     return (
       <Box
@@ -209,6 +239,32 @@ function DoctorDetailPage() {
             >
               {doctor.user.name}
             </Typography>
+            <Box
+              sx={{
+                display: "flex",
+                alignItems: "center",
+                gap: 1,
+                mb: 1,
+              }}
+            >
+              <Rating
+                value={Number(doctor.rating ?? 0)}
+                precision={0.5}
+                readOnly
+                size="small"
+              />
+
+              <Typography
+                variant="body2"
+                sx={{
+                  color: "text.secondary",
+                }}
+              >
+                {doctor.rating
+                  ? `${Number(doctor.rating).toFixed(1)}/5`
+                  : "Chưa có đánh giá"}
+              </Typography>
+            </Box>
 
             <Typography
               sx={{
@@ -471,6 +527,95 @@ function DoctorDetailPage() {
           </Box>
         )}
       </Paper>
+
+      <Box sx={{ mt: 5 }}>
+        <Typography
+          variant="h5"
+          sx={{
+            fontWeight: 700,
+            mb: 1,
+          }}
+        >
+          Đánh giá từ bệnh nhân
+        </Typography>
+
+        <Typography
+          sx={{
+            color: "text.secondary",
+            mb: 3,
+          }}
+        >
+          Nhận xét từ những bệnh nhân đã khám với bác sĩ.
+        </Typography>
+
+        {reviewLoading ? (
+          <Box
+            sx={{
+              display: "flex",
+              justifyContent: "center",
+              py: 4,
+            }}
+          >
+            <CircularProgress />
+          </Box>
+        ) : reviews.length === 0 ? (
+          <Alert severity="info">Bác sĩ chưa có đánh giá.</Alert>
+        ) : (
+          <Box
+            sx={{
+              display: "flex",
+              flexDirection: "column",
+              gap: 2,
+            }}
+          >
+            {reviews.map((review) => (
+              <Paper
+                key={review.id}
+                variant="outlined"
+                sx={{
+                  p: 3,
+                  borderRadius: 3,
+                }}
+              >
+                <Box
+                  sx={{
+                    display: "flex",
+                    justifyContent: "space-between",
+                    alignItems: {
+                      xs: "flex-start",
+                      sm: "center",
+                    },
+                    flexDirection: {
+                      xs: "column",
+                      sm: "row",
+                    },
+                    gap: 1,
+                    mb: 2,
+                  }}
+                >
+                  <Box>
+                    <Typography
+                      sx={{
+                        fontWeight: 700,
+                      }}
+                    >
+                      {review.patient?.name || "Bệnh nhân"}
+                    </Typography>
+
+                    <Rating value={review.rating} readOnly size="small" />
+                  </Box>
+
+                  <Chip size="small" label={`${review.rating}/5`} />
+                </Box>
+
+                <Typography>
+                  {review.comment || "Không có nhận xét."}
+                </Typography>
+              </Paper>
+            ))}
+          </Box>
+        )}
+      </Box>
     </Box>
   );
 }

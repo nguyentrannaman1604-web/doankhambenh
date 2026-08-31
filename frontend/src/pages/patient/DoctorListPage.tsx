@@ -12,6 +12,7 @@ import {
   Paper,
   Select,
   Typography,
+  Rating,
 } from "@mui/material";
 
 import type { Doctor, Specialty } from "../../types/doctor";
@@ -20,7 +21,7 @@ import { getDoctors } from "../../services/doctorService";
 
 import { getSpecialties } from "../../services/specialtyService";
 
-import { Link } from "react-router-dom";
+import { Link, useSearchParams } from "react-router-dom";
 
 interface DoctorCardProps {
   doctor: Doctor;
@@ -73,6 +74,32 @@ function DoctorCard({ doctor }: DoctorCardProps) {
           >
             {doctor.user.name}
           </Typography>
+          <Box
+            sx={{
+              display: "flex",
+              alignItems: "center",
+              gap: 1,
+              mb: 1,
+            }}
+          >
+            <Rating
+              value={Number(doctor.rating ?? 0)}
+              precision={0.5}
+              readOnly
+              size="small"
+            />
+
+            <Typography
+              variant="body2"
+              sx={{
+                color: "text.secondary",
+              }}
+            >
+              {doctor.rating
+                ? Number(doctor.rating).toFixed(1)
+                : "Chưa có đánh giá"}
+            </Typography>
+          </Box>
 
           <Typography
             sx={{
@@ -122,11 +149,16 @@ function DoctorCard({ doctor }: DoctorCardProps) {
 }
 
 function DoctorListPage() {
+  const [searchParams] = useSearchParams();
+
+  const specialtyIdFromUrl = searchParams.get("specialtyId");
   const [doctors, setDoctors] = useState<Doctor[]>([]);
 
   const [specialties, setSpecialties] = useState<Specialty[]>([]);
 
-  const [selectedSpecialty, setSelectedSpecialty] = useState("");
+  const [selectedSpecialty, setSelectedSpecialty] = useState(
+    specialtyIdFromUrl || "",
+  );
 
   const [loading, setLoading] = useState(true);
 
