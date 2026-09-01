@@ -13,6 +13,8 @@ import {
   DialogTitle,
   Paper,
   Rating,
+  Tab,
+  Tabs,
   TextField,
   Typography,
 } from "@mui/material";
@@ -55,6 +57,8 @@ function MyAppointmentsPage() {
 
   const [success, setSuccess] = useState("");
 
+  const [tabValue, setTabValue] = useState(0);
+
   const [cancellingId, setCancellingId] = useState<number | null>(null);
 
   const [reviewAppointment, setReviewAppointment] =
@@ -69,20 +73,30 @@ function MyAppointmentsPage() {
   const {
     control,
     register,
+
     handleSubmit: handleReviewSubmit,
+
     reset: resetReview,
-    formState: { errors: reviewErrors, isSubmitting: isReviewSubmitting },
+
+    formState: {
+      errors: reviewErrors,
+
+      isSubmitting: isReviewSubmitting,
+    },
   } = useForm<ReviewFormData>({
     resolver: yupResolver(reviewSchema),
 
     defaultValues: {
       rating: 5,
+
       comment: "",
     },
   });
 
   /*
-   * TẢI REVIEW CỦA CÁC LỊCH ĐÃ KHÁM
+   * ==========================
+   * LOAD REVIEW
+   * ==========================
    */
   const loadReviewsForAppointments = async (appointmentList: Appointment[]) => {
     try {
@@ -92,11 +106,13 @@ function MyAppointmentsPage() {
 
       if (completedAppointments.length === 0) {
         setReviewsByAppointment({});
+
         return;
       }
 
       /*
-       * Lấy danh sách doctorId không trùng nhau
+       * Lấy doctorId
+       * không trùng nhau
        */
       const doctorIds = [
         ...new Set(
@@ -105,7 +121,8 @@ function MyAppointmentsPage() {
       ];
 
       /*
-       * Gọi review của từng bác sĩ
+       * Gọi review
+       * của từng bác sĩ
        */
       const responses = await Promise.all(
         doctorIds.map(async (doctorId) => {
@@ -132,7 +149,9 @@ function MyAppointmentsPage() {
 
         response.data.forEach((review) => {
           /*
-           * Review thuộc appointment của bệnh nhân hiện tại
+           * Chỉ lấy review
+           * thuộc appointment
+           * hiện tại
            */
           if (appointmentIds.has(review.appointmentId)) {
             reviewMap[review.appointmentId] = review;
@@ -147,11 +166,14 @@ function MyAppointmentsPage() {
   };
 
   /*
-   * TẢI LỊCH HẸN
+   * ==========================
+   * LOAD APPOINTMENTS
+   * ==========================
    */
   const loadAppointments = async () => {
     try {
       setLoading(true);
+
       setError("");
 
       const response = await getMyAppointments();
@@ -173,7 +195,9 @@ function MyAppointmentsPage() {
   }, []);
 
   /*
+   * ==========================
    * HỦY LỊCH
+   * ==========================
    */
   const handleCancel = async (appointmentId: number) => {
     const confirmed = window.confirm(
@@ -188,7 +212,9 @@ function MyAppointmentsPage() {
       setCancellingId(appointmentId);
 
       setError("");
+
       setSuccess("");
+
       setReviewSuccess("");
 
       await cancelMyAppointment(appointmentId);
@@ -210,7 +236,9 @@ function MyAppointmentsPage() {
   };
 
   /*
+   * ==========================
    * MỞ FORM TẠO REVIEW
+   * ==========================
    */
   const handleOpenCreateReview = (appointment: Appointment) => {
     setReviewAppointment(appointment);
@@ -218,20 +246,29 @@ function MyAppointmentsPage() {
     setEditingReview(null);
 
     setReviewError("");
+
     setReviewSuccess("");
 
     resetReview({
       rating: 5,
+
       comment: "",
     });
   };
 
   /*
+   * ==========================
    * MỞ FORM SỬA REVIEW
+   * ==========================
    */
-  const handleOpenEditReview = (appointment: Appointment, review: Review) => {
+  const handleOpenEditReview = (
+    appointment: Appointment,
+
+    review: Review,
+  ) => {
     /*
-     * Backend chỉ cho sửa 1 lần
+     * Backend chỉ cho
+     * sửa 1 lần
      */
     if (review.editCount >= 1) {
       return;
@@ -242,16 +279,20 @@ function MyAppointmentsPage() {
     setEditingReview(review);
 
     setReviewError("");
+
     setReviewSuccess("");
 
     resetReview({
       rating: review.rating,
+
       comment: review.comment || "",
     });
   };
 
   /*
-   * ĐÓNG DIALOG
+   * ==========================
+   * ĐÓNG REVIEW DIALOG
+   * ==========================
    */
   const handleCloseReview = () => {
     setReviewAppointment(null);
@@ -262,18 +303,15 @@ function MyAppointmentsPage() {
 
     resetReview({
       rating: 5,
+
       comment: "",
     });
   };
 
   /*
-   * GỬI REVIEW
-   *
-   * editingReview === null
-   * => tạo mới
-   *
-   * editingReview !== null
-   * => cập nhật
+   * ==========================
+   * SUBMIT REVIEW
+   * ==========================
    */
   const onReviewSubmit = async (data: ReviewFormData) => {
     if (!reviewAppointment) {
@@ -282,27 +320,32 @@ function MyAppointmentsPage() {
 
     try {
       setReviewError("");
+
       setReviewSuccess("");
 
       setError("");
+
       setSuccess("");
 
       /*
        * SỬA REVIEW
        */
       if (editingReview) {
-        await updateReview(editingReview.id, {
-          rating: data.rating,
+        await updateReview(
+          editingReview.id,
 
-          comment: data.comment || undefined,
-        });
+          {
+            rating: data.rating,
+
+            comment: data.comment || undefined,
+          },
+        );
 
         setReviewSuccess("Cập nhật đánh giá thành công");
       } else {
-
-      /*
-       * TẠO REVIEW MỚI
-       */
+        /*
+         * TẠO REVIEW
+         */
         await createReview({
           appointmentId: reviewAppointment.id,
 
@@ -317,7 +360,7 @@ function MyAppointmentsPage() {
       handleCloseReview();
 
       /*
-       * Load lại để cập nhật trạng thái nút
+       * Load lại dữ liệu
        */
       await loadAppointments();
     } catch (error: unknown) {
@@ -334,7 +377,9 @@ function MyAppointmentsPage() {
   };
 
   /*
+   * ==========================
    * LOADING
+   * ==========================
    */
   if (loading) {
     return (
@@ -354,9 +399,64 @@ function MyAppointmentsPage() {
     );
   }
 
+  /*
+   * ==========================
+   * PHÂN LOẠI LỊCH HẸN
+   * ==========================
+   */
+
+  const now = dayjs();
+
+  /*
+   * SẮP TỚI:
+   *
+   * - PENDING
+   * - CONFIRMED
+   * - thời gian chưa qua
+   */
+  const upcomingAppointments = appointments
+    .filter((appointment) => {
+      const appointmentTime = dayjs(appointment.startAt);
+
+      return (
+        (appointment.status === "PENDING" ||
+          appointment.status === "CONFIRMED") &&
+        appointmentTime.isAfter(now)
+      );
+    })
+    .sort((a, b) => dayjs(a.startAt).valueOf() - dayjs(b.startAt).valueOf());
+
+  /*
+   * ĐÃ QUA:
+   *
+   * - COMPLETED
+   * - CANCELLED
+   * - hoặc thời gian đã qua
+   */
+  const pastAppointments = appointments
+    .filter((appointment) => {
+      const appointmentTime = dayjs(appointment.startAt);
+
+      return (
+        appointment.status === "COMPLETED" ||
+        appointment.status === "CANCELLED" ||
+        appointmentTime.isBefore(now)
+      );
+    })
+    .sort((a, b) => dayjs(b.startAt).valueOf() - dayjs(a.startAt).valueOf());
+
+  /*
+   * Danh sách đang được
+   * hiển thị theo tab
+   */
+  const displayedAppointments =
+    tabValue === 0 ? upcomingAppointments : pastAppointments;
+
   return (
     <Box>
-      {/* TIÊU ĐỀ */}
+      {/* =====================
+          TIÊU ĐỀ
+      ===================== */}
 
       <Box
         sx={{
@@ -369,6 +469,14 @@ function MyAppointmentsPage() {
             fontWeight: 700,
 
             mb: 1,
+
+            fontSize: {
+              xs: "1.7rem",
+
+              sm: "2rem",
+
+              md: "2.125rem",
+            },
           }}
         >
           Lịch hẹn của tôi
@@ -383,7 +491,9 @@ function MyAppointmentsPage() {
         </Typography>
       </Box>
 
-      {/* THÔNG BÁO */}
+      {/* =====================
+          THÔNG BÁO
+      ===================== */}
 
       {success && (
         <Alert
@@ -418,12 +528,57 @@ function MyAppointmentsPage() {
         </Alert>
       )}
 
-      {/* DANH SÁCH LỊCH HẸN */}
+      {/* =====================
+          TABS
+      ===================== */}
+
+      <Paper
+        variant="outlined"
+        sx={{
+          mb: 3,
+
+          borderRadius: 2,
+
+          overflow: "hidden",
+        }}
+      >
+        <Tabs
+          value={tabValue}
+          onChange={(_, newValue) => setTabValue(newValue)}
+          variant="fullWidth"
+        >
+          <Tab
+            label={`Sắp tới (${upcomingAppointments.length})`}
+            sx={{
+              textTransform: "none",
+
+              fontWeight: 600,
+            }}
+          />
+
+          <Tab
+            label={`Đã qua (${pastAppointments.length})`}
+            sx={{
+              textTransform: "none",
+
+              fontWeight: 600,
+            }}
+          />
+        </Tabs>
+      </Paper>
+
+      {/* =====================
+          DANH SÁCH
+      ===================== */}
 
       {appointments.length === 0 ? (
         <Paper
           sx={{
-            p: 5,
+            p: {
+              xs: 3,
+
+              sm: 5,
+            },
 
             textAlign: "center",
           }}
@@ -436,6 +591,44 @@ function MyAppointmentsPage() {
             Bạn chưa có lịch hẹn nào.
           </Typography>
         </Paper>
+      ) : displayedAppointments.length === 0 ? (
+        <Paper
+          variant="outlined"
+          sx={{
+            p: {
+              xs: 3,
+
+              sm: 5,
+            },
+
+            textAlign: "center",
+
+            borderRadius: 3,
+          }}
+        >
+          <Typography
+            variant="h6"
+            sx={{
+              fontWeight: 600,
+
+              mb: 1,
+            }}
+          >
+            {tabValue === 0
+              ? "Không có lịch hẹn sắp tới"
+              : "Chưa có lịch hẹn đã qua"}
+          </Typography>
+
+          <Typography
+            sx={{
+              color: "text.secondary",
+            }}
+          >
+            {tabValue === 0
+              ? "Các lịch khám sắp tới của bạn sẽ xuất hiện tại đây."
+              : "Các lịch đã khám hoặc đã hủy sẽ xuất hiện tại đây."}
+          </Typography>
+        </Paper>
       ) : (
         <Box
           sx={{
@@ -446,7 +639,7 @@ function MyAppointmentsPage() {
             gap: 2,
           }}
         >
-          {appointments.map((appointment) => (
+          {displayedAppointments.map((appointment) => (
             <AppointmentCard
               key={appointment.id}
               appointment={appointment}
@@ -460,7 +653,9 @@ function MyAppointmentsPage() {
         </Box>
       )}
 
-      {/* DIALOG REVIEW */}
+      {/* =====================
+          DIALOG REVIEW
+      ===================== */}
 
       <Dialog
         open={!!reviewAppointment}
@@ -485,7 +680,7 @@ function MyAppointmentsPage() {
                 gap: 3,
               }}
             >
-              {/* TÊN BÁC SĨ */}
+              {/* BÁC SĨ */}
 
               {reviewAppointment && (
                 <Alert severity="info">
@@ -500,7 +695,7 @@ function MyAppointmentsPage() {
                 </Alert>
               )}
 
-              {/* THÔNG BÁO SỬA 1 LẦN */}
+              {/* THÔNG BÁO SỬA */}
 
               {editingReview && (
                 <Alert severity="warning">
@@ -605,7 +800,9 @@ function MyAppointmentsPage() {
 }
 
 /*
- * PROPS CỦA APPOINTMENT CARD
+ * ==========================
+ * PROPS APPOINTMENT CARD
+ * ==========================
  */
 interface AppointmentCardProps {
   appointment: Appointment;
@@ -618,11 +815,17 @@ interface AppointmentCardProps {
 
   onCreateReview: (appointment: Appointment) => void;
 
-  onEditReview: (appointment: Appointment, review: Review) => void;
+  onEditReview: (
+    appointment: Appointment,
+
+    review: Review,
+  ) => void;
 }
 
 /*
- * CARD LỊCH HẸN
+ * ==========================
+ * APPOINTMENT CARD
+ * ==========================
  */
 function AppointmentCard({
   appointment,
@@ -648,7 +851,8 @@ function AppointmentCard({
   const canCreateReview = isCompleted && !review;
 
   /*
-   * Đã đánh giá nhưng chưa sửa
+   * Đã đánh giá
+   * nhưng chưa sửa
    */
   const canEditReview = isCompleted && !!review && review.editCount === 0;
 
@@ -661,7 +865,11 @@ function AppointmentCard({
     <Paper
       elevation={2}
       sx={{
-        p: 3,
+        p: {
+          xs: 2,
+
+          sm: 3,
+        },
 
         borderRadius: 3,
       }}
@@ -688,20 +896,34 @@ function AppointmentCard({
             display: "flex",
 
             gap: 2,
+
+            alignItems: "flex-start",
           }}
         >
           <Avatar
             src={appointment.doctor?.user.avatar || undefined}
             sx={{
-              width: 64,
+              width: {
+                xs: 54,
 
-              height: 64,
+                sm: 64,
+              },
+
+              height: {
+                xs: 54,
+
+                sm: 64,
+              },
             }}
           >
             {appointment.doctor?.user.name?.charAt(0).toUpperCase() || "B"}
           </Avatar>
 
-          <Box>
+          <Box
+            sx={{
+              minWidth: 0,
+            }}
+          >
             <Typography
               variant="h6"
               sx={{
@@ -734,7 +956,7 @@ function AppointmentCard({
               </strong>
             </Typography>
 
-            {/* REVIEW ĐÃ TẠO */}
+            {/* REVIEW */}
 
             {review && (
               <Box
@@ -751,6 +973,8 @@ function AppointmentCard({
                     gap: 1,
 
                     mb: 0.5,
+
+                    flexWrap: "wrap",
                   }}
                 >
                   <Rating value={review.rating} readOnly size="small" />
@@ -777,7 +1001,9 @@ function AppointmentCard({
 
         <Box
           sx={{
-            minWidth: 180,
+            minWidth: {
+              md: 180,
+            },
 
             display: "flex",
 
@@ -794,7 +1020,7 @@ function AppointmentCard({
         >
           <StatusChip status={appointment.status} />
 
-          {/* HỦY LỊCH */}
+          {/* HỦY */}
 
           {canCancel && (
             <Button
@@ -810,7 +1036,7 @@ function AppointmentCard({
             </Button>
           )}
 
-          {/* CHƯA ĐÁNH GIÁ */}
+          {/* TẠO REVIEW */}
 
           {canCreateReview && (
             <Button
@@ -824,12 +1050,18 @@ function AppointmentCard({
             </Button>
           )}
 
-          {/* ĐƯỢC SỬA 1 LẦN */}
+          {/* SỬA REVIEW */}
 
           {canEditReview && review && (
             <Button
               variant="outlined"
-              onClick={() => onEditReview(appointment, review)}
+              onClick={() =>
+                onEditReview(
+                  appointment,
+
+                  review,
+                )
+              }
               sx={{
                 textTransform: "none",
               }}
@@ -838,7 +1070,7 @@ function AppointmentCard({
             </Button>
           )}
 
-          {/* ĐÃ SỬA HẾT QUYỀN */}
+          {/* ĐÃ ĐÁNH GIÁ */}
 
           {reviewCompleted && (
             <Chip label="Đã đánh giá" color="success" variant="outlined" />
@@ -850,7 +1082,9 @@ function AppointmentCard({
 }
 
 /*
- * CHIP TRẠNG THÁI LỊCH
+ * ==========================
+ * STATUS CHIP
+ * ==========================
  */
 function StatusChip({ status }: { status: AppointmentStatus }) {
   switch (status) {

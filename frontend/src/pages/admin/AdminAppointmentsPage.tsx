@@ -17,11 +17,16 @@ import {
 } from "@mui/material";
 
 import dayjs from "dayjs";
+import axios from "axios";
 
 import type {
   AdminAppointment,
   AppointmentStatus,
 } from "../../types/appointment";
+
+import type {
+  Doctor,
+} from "../../types/doctor";
 
 import {
   confirmAppointment,
@@ -29,11 +34,29 @@ import {
   staffCancelAppointment,
 } from "../../services/adminAppointmentService";
 
+import {
+  getDoctors,
+} from "../../services/doctorService";
+
 function AdminAppointmentsPage() {
   const [
     appointments,
     setAppointments,
-  ] = useState<AdminAppointment[]>([]);
+  ] = useState<
+    AdminAppointment[]
+  >([]);
+
+  const [
+    doctors,
+    setDoctors,
+  ] = useState<
+    Doctor[]
+  >([]);
+
+  const [
+    doctorFilter,
+    setDoctorFilter,
+  ] = useState("");
 
   const [
     statusFilter,
@@ -53,7 +76,9 @@ function AdminAppointmentsPage() {
   const [
     actionId,
     setActionId,
-  ] = useState<number | null>(null);
+  ] = useState<
+    number | null
+  >(null);
 
   const [
     error,
@@ -65,17 +90,34 @@ function AdminAppointmentsPage() {
     setSuccess,
   ] = useState("");
 
-  const loadAppointments =
+  /*
+   * ==========================
+   * LOAD DATA
+   * ==========================
+   */
+
+  const loadData =
     async () => {
       try {
         setLoading(true);
+
         setError("");
 
-        const response =
-          await getAllAppointments();
+        const [
+          appointmentResponse,
+          doctorResponse,
+        ] =
+          await Promise.all([
+            getAllAppointments(),
+            getDoctors(),
+          ]);
 
         setAppointments(
-          response.data
+          appointmentResponse.data
+        );
+
+        setDoctors(
+          doctorResponse.data
         );
       } catch (error) {
         console.error(
@@ -84,7 +126,7 @@ function AdminAppointmentsPage() {
         );
 
         setError(
-          "Không thể tải danh sách lịch hẹn"
+          "Không thể tải dữ liệu lịch hẹn"
         );
       } finally {
         setLoading(false);
@@ -92,41 +134,91 @@ function AdminAppointmentsPage() {
     };
 
   useEffect(() => {
-    loadAppointments();
+    loadData();
   }, []);
+
+  /*
+   * ==========================
+   * SẮP XẾP DANH SÁCH BÁC SĨ
+   * ==========================
+   */
+
+  const sortedDoctors =
+    useMemo(() => {
+      return [...doctors].sort(
+        (a, b) =>
+          a.user.name.localeCompare(
+            b.user.name,
+            "vi"
+          )
+      );
+    }, [doctors]);
+
+  /*
+   * ==========================
+   * FILTER APPOINTMENTS
+   * ==========================
+   */
 
   const filteredAppointments =
     useMemo(() => {
-      return appointments.filter(
-        (appointment) => {
-          const matchStatus =
-            !statusFilter ||
-            appointment.status ===
-              statusFilter;
+      return appointments
+        .filter(
+          (
+            appointment
+          ) => {
+            const matchDoctor =
+              !doctorFilter ||
+              appointment.doctorId ===
+                Number(
+                  doctorFilter
+                );
 
-          const appointmentDate =
-            dayjs(
-              appointment.startAt
-            ).format(
-              "YYYY-MM-DD"
+            const matchStatus =
+              !statusFilter ||
+              appointment.status ===
+                statusFilter;
+
+            const appointmentDate =
+              dayjs(
+                appointment.startAt
+              ).format(
+                "YYYY-MM-DD"
+              );
+
+            const matchDate =
+              !dateFilter ||
+              appointmentDate ===
+                dateFilter;
+
+            return (
+              matchDoctor &&
+              matchStatus &&
+              matchDate
             );
-
-          const matchDate =
-            !dateFilter ||
-            appointmentDate ===
-              dateFilter;
-
-          return (
-            matchStatus &&
-            matchDate
-          );
-        }
-      );
+          }
+        )
+        .sort(
+          (a, b) =>
+            dayjs(
+              b.startAt
+            ).valueOf() -
+            dayjs(
+              a.startAt
+            ).valueOf()
+        );
     }, [
       appointments,
+      doctorFilter,
       statusFilter,
       dateFilter,
     ]);
+
+  /*
+   * ==========================
+   * XÁC NHẬN LỊCH
+   * ==========================
+   */
 
   const handleConfirm =
     async (
@@ -157,22 +249,43 @@ function AdminAppointmentsPage() {
           "Xác nhận lịch hẹn thành công"
         );
 
-        await loadAppointments();
-      } catch (error: any) {
+        await loadData();
+      } catch (
+        error: unknown
+      ) {
         console.error(
           "Confirm appointment error:",
           error
         );
 
-        setError(
-          error.response?.data
-            ?.message ||
+        if (
+          axios.isAxiosError(
+            error
+          )
+        ) {
+          setError(
+            error.response
+              ?.data
+              ?.message ||
+              "Không thể xác nhận lịch hẹn"
+          );
+        } else {
+          setError(
             "Không thể xác nhận lịch hẹn"
-        );
+          );
+        }
       } finally {
-        setActionId(null);
+        setActionId(
+          null
+        );
       }
     };
+
+  /*
+   * ==========================
+   * HỦY LỊCH
+   * ==========================
+   */
 
   const handleCancel =
     async (
@@ -203,25 +316,55 @@ function AdminAppointmentsPage() {
           "Hủy lịch hẹn thành công"
         );
 
-        await loadAppointments();
-      } catch (error: any) {
+        await loadData();
+      } catch (
+        error: unknown
+      ) {
         console.error(
           "Staff cancel error:",
           error
         );
 
-        setError(
-          error.response?.data
-            ?.message ||
+        if (
+          axios.isAxiosError(
+            error
+          )
+        ) {
+          setError(
+            error.response
+              ?.data
+              ?.message ||
+              "Không thể hủy lịch hẹn"
+          );
+        } else {
+          setError(
             "Không thể hủy lịch hẹn"
-        );
+          );
+        }
       } finally {
-        setActionId(null);
+        setActionId(
+          null
+        );
       }
+    };
+
+  /*
+   * ==========================
+   * XÓA FILTER
+   * ==========================
+   */
+
+  const handleClearFilters =
+    () => {
+      setDoctorFilter("");
+      setStatusFilter("");
+      setDateFilter("");
     };
 
   return (
     <Box>
+      {/* TIÊU ĐỀ */}
+
       <Box
         sx={{
           mb: 4,
@@ -231,7 +374,16 @@ function AdminAppointmentsPage() {
           variant="h4"
           sx={{
             fontWeight: 700,
+
             mb: 1,
+
+            fontSize: {
+              xs: "1.7rem",
+
+              sm: "2rem",
+
+              md: "2.125rem",
+            },
           }}
         >
           Quản lý lịch hẹn
@@ -249,10 +401,14 @@ function AdminAppointmentsPage() {
         </Typography>
       </Box>
 
+      {/* THÔNG BÁO */}
+
       {success && (
         <Alert
           severity="success"
-          sx={{ mb: 3 }}
+          sx={{
+            mb: 3,
+          }}
         >
           {success}
         </Alert>
@@ -261,38 +417,138 @@ function AdminAppointmentsPage() {
       {error && (
         <Alert
           severity="error"
-          sx={{ mb: 3 }}
+          sx={{
+            mb: 3,
+          }}
         >
           {error}
         </Alert>
       )}
 
+      {/* BỘ LỌC */}
+
       <Paper
         sx={{
-          p: 3,
+          p: {
+            xs: 2,
+            sm: 3,
+          },
+
           borderRadius: 3,
+
           mb: 3,
         }}
       >
-        <Box
+        <Typography
           sx={{
-            display: "flex",
-            flexWrap: "wrap",
-            gap: 2,
+            fontWeight: 700,
+            mb: 2,
           }}
         >
+          Bộ lọc lịch hẹn
+        </Typography>
+
+        <Box
+          sx={{
+            display: "grid",
+
+            gridTemplateColumns: {
+              xs: "1fr",
+
+              sm:
+                "repeat(2, 1fr)",
+
+              lg:
+                "repeat(4, 1fr)",
+            },
+
+            gap: 2,
+
+            alignItems:
+              "center",
+          }}
+        >
+          {/* BÁC SĨ */}
+
           <TextField
             select
+            fullWidth
+            label="Bác sĩ"
+            value={
+              doctorFilter
+            }
+            onChange={(
+              event
+            ) =>
+              setDoctorFilter(
+                event.target.value
+              )
+            }
+          >
+            <MenuItem value="">
+              Tất cả bác sĩ
+            </MenuItem>
+
+            {sortedDoctors.map(
+              (doctor) => (
+                <MenuItem
+                  key={
+                    doctor.id
+                  }
+                  value={
+                    String(
+                      doctor.id
+                    )
+                  }
+                >
+                  {
+                    doctor.user
+                      .name
+                  }
+                </MenuItem>
+              )
+            )}
+          </TextField>
+
+          {/* NGÀY */}
+
+          <TextField
+            fullWidth
+            label="Ngày khám"
+            type="date"
+            value={
+              dateFilter
+            }
+            onChange={(
+              event
+            ) =>
+              setDateFilter(
+                event.target.value
+              )
+            }
+            slotProps={{
+              inputLabel: {
+                shrink: true,
+              },
+            }}
+          />
+
+          {/* TRẠNG THÁI */}
+
+          <TextField
+            select
+            fullWidth
             label="Trạng thái"
-            value={statusFilter}
-            onChange={(event) =>
+            value={
+              statusFilter
+            }
+            onChange={(
+              event
+            ) =>
               setStatusFilter(
                 event.target.value
               )
             }
-            sx={{
-              minWidth: 200,
-            }}
           >
             <MenuItem value="">
               Tất cả trạng thái
@@ -315,31 +571,18 @@ function AdminAppointmentsPage() {
             </MenuItem>
           </TextField>
 
-          <TextField
-            label="Ngày khám"
-            type="date"
-            value={dateFilter}
-            onChange={(event) =>
-              setDateFilter(
-                event.target.value
-              )
-            }
-            slotProps={{
-              inputLabel: {
-                shrink: true,
-              },
-            }}
-          />
+          {/* XÓA FILTER */}
 
           <Button
             variant="outlined"
-            onClick={() => {
-              setStatusFilter("");
-              setDateFilter("");
-            }}
+            onClick={
+              handleClearFilters
+            }
             sx={{
               textTransform:
                 "none",
+
+              minHeight: 56,
             }}
           >
             Xóa bộ lọc
@@ -347,10 +590,13 @@ function AdminAppointmentsPage() {
         </Box>
       </Paper>
 
+      {/* SỐ KẾT QUẢ */}
+
       <Typography
         sx={{
           color:
             "text.secondary",
+
           mb: 2,
         }}
       >
@@ -363,44 +609,78 @@ function AdminAppointmentsPage() {
         lịch hẹn
       </Typography>
 
+      {/* DANH SÁCH */}
+
       {loading ? (
         <Box
           sx={{
             minHeight: 300,
+
             display: "flex",
+
             justifyContent:
               "center",
-            alignItems: "center",
+
+            alignItems:
+              "center",
           }}
         >
           <CircularProgress />
         </Box>
-      ) : filteredAppointments
-          .length === 0 ? (
+      ) : filteredAppointments.length ===
+        0 ? (
         <Paper
+          variant="outlined"
           sx={{
-            p: 5,
-            textAlign: "center",
+            p: {
+              xs: 3,
+              sm: 5,
+            },
+
+            textAlign:
+              "center",
+
+            borderRadius: 3,
           }}
         >
           <Typography
-            color="text.secondary"
+            variant="h6"
+            sx={{
+              fontWeight: 600,
+
+              mb: 1,
+            }}
           >
             Không tìm thấy lịch
-            hẹn phù hợp.
+            hẹn
+          </Typography>
+
+          <Typography
+            sx={{
+              color:
+                "text.secondary",
+            }}
+          >
+            Không có lịch hẹn nào
+            phù hợp với bộ lọc hiện
+            tại.
           </Typography>
         </Paper>
       ) : (
         <Box
           sx={{
             display: "flex",
+
             flexDirection:
               "column",
+
             gap: 2,
           }}
         >
           {filteredAppointments.map(
-            (appointment) => (
+            (
+              appointment
+            ) => (
               <AppointmentCard
                 key={
                   appointment.id
@@ -462,28 +742,43 @@ function AppointmentCard({
     <Paper
       elevation={2}
       sx={{
-        p: 3,
+        p: {
+          xs: 2,
+          sm: 3,
+        },
+
         borderRadius: 3,
       }}
     >
       <Box
         sx={{
           display: "grid",
+
           gridTemplateColumns: {
             xs: "1fr",
+
             md:
               "1.2fr 1.2fr 1fr auto",
           },
+
           gap: 3,
-          alignItems: "center",
+
+          alignItems:
+            "center",
         }}
       >
+        {/* BỆNH NHÂN */}
+
         <Box>
           <Typography
             sx={{
               color:
                 "text.secondary",
+
               mb: 0.5,
+
+              fontSize:
+                "0.875rem",
             }}
           >
             Bệnh nhân
@@ -492,6 +787,8 @@ function AppointmentCard({
           <Typography
             sx={{
               fontWeight: 700,
+
+              mb: 0.5,
             }}
           >
             {
@@ -512,6 +809,13 @@ function AppointmentCard({
 
           <Typography
             variant="body2"
+            sx={{
+              color:
+                "text.secondary",
+
+              overflowWrap:
+                "anywhere",
+            }}
           >
             {
               appointment.patient
@@ -520,12 +824,18 @@ function AppointmentCard({
           </Typography>
         </Box>
 
+        {/* BÁC SĨ */}
+
         <Box>
           <Typography
             sx={{
               color:
                 "text.secondary",
+
               mb: 0.5,
+
+              fontSize:
+                "0.875rem",
             }}
           >
             Bác sĩ
@@ -534,6 +844,8 @@ function AppointmentCard({
           <Typography
             sx={{
               fontWeight: 700,
+
+              mb: 0.5,
             }}
           >
             {
@@ -553,10 +865,13 @@ function AppointmentCard({
           </Typography>
         </Box>
 
+        {/* THỜI GIAN */}
+
         <Box>
           <Typography
             sx={{
               fontWeight: 700,
+
               mb: 0.5,
             }}
           >
@@ -575,7 +890,9 @@ function AppointmentCard({
             {dayjs(
               appointment.startAt
             ).format("HH:mm")}
+
             {" - "}
+
             {dayjs(
               appointment.endAt
             ).format("HH:mm")}
@@ -592,23 +909,33 @@ function AppointmentCard({
               variant="body2"
               sx={{
                 mt: 1,
+
                 color:
                   "text.secondary",
               }}
             >
               Lý do:{" "}
-              {appointment.reason}
+              {
+                appointment.reason
+              }
             </Typography>
           )}
         </Box>
 
+        {/* ACTION */}
+
         <Box
           sx={{
             display: "flex",
+
             flexDirection:
               "column",
+
             gap: 1,
-            minWidth: 150,
+
+            minWidth: {
+              md: 150,
+            },
           }}
         >
           {canConfirm && (
@@ -627,7 +954,9 @@ function AppointmentCard({
                   "none",
               }}
             >
-              Xác nhận
+              {processing
+                ? "Đang xử lý..."
+                : "Xác nhận"}
             </Button>
           )}
 
@@ -648,7 +977,9 @@ function AppointmentCard({
                   "none",
               }}
             >
-              Hủy lịch
+              {processing
+                ? "Đang xử lý..."
+                : "Hủy lịch"}
             </Button>
           )}
         </Box>
@@ -660,7 +991,8 @@ function AppointmentCard({
 function StatusChip({
   status,
 }: {
-  status: AppointmentStatus;
+  status:
+    AppointmentStatus;
 }) {
   switch (status) {
     case "PENDING":
