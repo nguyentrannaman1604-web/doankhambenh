@@ -22,6 +22,7 @@ import AdminAppointmentsPage from "./pages/admin/AdminAppointmentsPage";
 import AdminDoctorsPage from "./pages/admin/AdminDoctorsPage";
 import AdminSpecialtiesPage from "./pages/admin/AdminSpecialtiesPage";
 import AdminStatisticsPage from "./pages/admin/AdminStatisticsPage";
+import DoctorProfilePage from "./pages/doctor/DoctorProfilePage";
 
 function App() {
   const { user, isAuthenticated } = useAuth();
@@ -102,10 +103,12 @@ function App() {
       >
         <Route path="/doctor" element={<DoctorHomePage />} />
         <Route path="/doctor/schedules" element={<DoctorSchedulePage />} />
+        
         <Route
           path="/doctor/patients-today"
           element={<DoctorPatientsTodayPage />}
         />
+        <Route path="/doctor/profile" element={<DoctorProfilePage />} />
       </Route>
 
       <Route

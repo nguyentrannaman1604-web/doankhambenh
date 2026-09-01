@@ -1,3 +1,4 @@
+
 import { Router } from "express";
 
 import {
@@ -5,6 +6,7 @@ import {
   createSchedule,
   updateSchedule,
   toggleSchedule,
+  removeSchedule,
   getBlockedSlots,
   blockSlot,
   removeBlockedSlot,
@@ -22,6 +24,11 @@ router.use(
   authorize("DOCTOR")
 );
 
+/*
+ * ==========================
+ * BLOCKED SLOTS
+ * ==========================
+ */
 
 router.get(
   "/blocked-slots",
@@ -38,15 +45,35 @@ router.delete(
   removeBlockedSlot
 );
 
-router.get("/", getSchedules);
+/*
+ * ==========================
+ * DOCTOR SCHEDULES
+ * ==========================
+ */
 
-router.post("/", createSchedule);
+router.get(
+  "/",
+  getSchedules
+);
+
+router.post(
+  "/",
+  createSchedule
+);
 
 router.patch(
   "/:id/toggle",
   toggleSchedule
 );
 
-router.patch("/:id", updateSchedule);
+router.patch(
+  "/:id",
+  updateSchedule
+);
+
+router.delete(
+  "/:id",
+  removeSchedule
+);
 
 export default router;

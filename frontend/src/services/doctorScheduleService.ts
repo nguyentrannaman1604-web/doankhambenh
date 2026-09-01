@@ -10,8 +10,6 @@ import type {
   CreateBlockedSlotResponse,
 } from "../types/schedule";
 
-
-
 export const getMyDoctorSchedules =
   async (): Promise<DoctorSchedulesResponse> => {
     const response =
@@ -61,7 +59,24 @@ export const toggleDoctorSchedule =
     return response.data;
   };
 
+/*
+ * ==========================
+ * XÓA LỊCH LÀM VIỆC
+ * ==========================
+ */
 
+export const deleteDoctorSchedule =
+  async (id: number): Promise<void> => {
+    await api.delete(
+      `/doctor/schedules/${id}`
+    );
+  };
+
+/*
+ * ==========================
+ * BLOCKED SLOTS
+ * ==========================
+ */
 
 export const getMyBlockedSlots =
   async (): Promise<BlockedSlotsResponse> => {

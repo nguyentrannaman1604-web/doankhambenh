@@ -1,3 +1,5 @@
+
+
 import prisma from "../lib/prisma.js";
 import { AppError } from "../types/AppError.js";
 
@@ -22,14 +24,20 @@ async function getDoctorByUserId(userId: number) {
   });
 
   if (!doctor) {
-    throw new AppError("Không tìm thấy hồ sơ bác sĩ", 404);
+    throw new AppError(
+      "Không tìm thấy hồ sơ bác sĩ",
+      404
+    );
   }
 
   return doctor;
 }
 
-export async function getMySchedules(userId: number) {
-  const doctor = await getDoctorByUserId(userId);
+export async function getMySchedules(
+  userId: number
+) {
+  const doctor =
+    await getDoctorByUserId(userId);
 
   return prisma.workingSchedule.findMany({
     where: {
@@ -41,45 +49,78 @@ export async function getMySchedules(userId: number) {
   });
 }
 
-export async function createMySchedule(userId: number, input: ScheduleInput) {
-  const doctor = await getDoctorByUserId(userId);
+export async function createMySchedule(
+  userId: number,
+  input: ScheduleInput
+) {
+  const doctor =
+    await getDoctorByUserId(userId);
 
-  if (input.dayOfWeek < 0 || input.dayOfWeek > 6) {
-    throw new AppError("dayOfWeek phải từ 0 đến 6", 400);
+  if (
+    input.dayOfWeek < 0 ||
+    input.dayOfWeek > 6
+  ) {
+    throw new AppError(
+      "dayOfWeek phải từ 0 đến 6",
+      400
+    );
   }
 
-  const timeRegex = /^([01]\d|2[0-3]):[0-5]\d$/;
+  const timeRegex =
+    /^([01]\d|2[0-3]):[0-5]\d$/;
 
-  if (!timeRegex.test(input.startTime) || !timeRegex.test(input.endTime)) {
-    throw new AppError("Thời gian phải có định dạng HH:mm", 400);
+  if (
+    !timeRegex.test(input.startTime) ||
+    !timeRegex.test(input.endTime)
+  ) {
+    throw new AppError(
+      "Thời gian phải có định dạng HH:mm",
+      400
+    );
   }
 
-  if (input.startTime >= input.endTime) {
-    throw new AppError("Giờ bắt đầu phải nhỏ hơn giờ kết thúc", 400);
+  if (
+    input.startTime >= input.endTime
+  ) {
+    throw new AppError(
+      "Giờ bắt đầu phải nhỏ hơn giờ kết thúc",
+      400
+    );
   }
 
-  const slotDuration = input.slotDuration ?? 30;
+  const slotDuration =
+    input.slotDuration ?? 30;
 
   if (slotDuration <= 0) {
-    throw new AppError("Thời lượng mỗi slot phải lớn hơn 0", 400);
+    throw new AppError(
+      "Thời lượng mỗi slot phải lớn hơn 0",
+      400
+    );
   }
 
-  // Kiểm tra lịch làm việc bị trùng
-  const existingSchedules = await prisma.workingSchedule.findMany({
-    where: {
-      doctorId: doctor.id,
-      dayOfWeek: input.dayOfWeek,
-      isActive: true,
-    },
-  });
+  const existingSchedules =
+    await prisma.workingSchedule.findMany({
+      where: {
+        doctorId: doctor.id,
+        dayOfWeek: input.dayOfWeek,
+        isActive: true,
+      },
+    });
 
-  const hasOverlap = existingSchedules.some(
-    (schedule) =>
-      input.startTime < schedule.endTime && input.endTime > schedule.startTime,
-  );
+  const hasOverlap =
+    existingSchedules.some(
+      (schedule) =>
+        input.startTime <
+          schedule.endTime &&
+        input.endTime >
+          schedule.startTime
+    );
 
   if (hasOverlap) {
-    throw new AppError("Khung giờ làm việc bị trùng với lịch hiện có", 409);
+    throw new AppError(
+      "Khung giờ làm việc bị trùng với lịch hiện có",
+      409
+    );
   }
 
   return prisma.workingSchedule.create({
@@ -97,39 +138,102 @@ export async function createMySchedule(userId: number, input: ScheduleInput) {
 export async function updateMySchedule(
   userId: number,
   scheduleId: number,
-  input: Partial<ScheduleInput>,
+  input: Partial<ScheduleInput>
 ) {
-  const doctor = await getDoctorByUserId(userId);
+  const doctor =
+    await getDoctorByUserId(userId);
 
-  const schedule = await prisma.workingSchedule.findFirst({
-    where: {
-      id: scheduleId,
-      doctorId: doctor.id,
-    },
-  });
+  const schedule =
+    await prisma.workingSchedule.findFirst({
+      where: {
+        id: scheduleId,
+        doctorId: doctor.id,
+      },
+    });
 
   if (!schedule) {
-    throw new AppError("Không tìm thấy lịch làm việc", 404);
+    throw new AppError(
+      "Không tìm thấy lịch làm việc",
+      404
+    );
   }
 
-  const dayOfWeek = input.dayOfWeek ?? schedule.dayOfWeek;
+  const dayOfWeek =
+    input.dayOfWeek ??
+    schedule.dayOfWeek;
 
-  const startTime = input.startTime ?? schedule.startTime;
+  const startTime =
+    input.startTime ??
+    schedule.startTime;
 
-  const endTime = input.endTime ?? schedule.endTime;
+  const endTime =
+    input.endTime ??
+    schedule.endTime;
 
-  const slotDuration = input.slotDuration ?? schedule.slotDuration;
+  const slotDuration =
+    input.slotDuration ??
+    schedule.slotDuration;
 
-  if (dayOfWeek < 0 || dayOfWeek > 6) {
-    throw new AppError("dayOfWeek phải từ 0 đến 6", 400);
+  if (
+    dayOfWeek < 0 ||
+    dayOfWeek > 6
+  ) {
+    throw new AppError(
+      "dayOfWeek phải từ 0 đến 6",
+      400
+    );
+  }
+
+  const timeRegex =
+    /^([01]\d|2[0-3]):[0-5]\d$/;
+
+  if (
+    !timeRegex.test(startTime) ||
+    !timeRegex.test(endTime)
+  ) {
+    throw new AppError(
+      "Thời gian phải có định dạng HH:mm",
+      400
+    );
   }
 
   if (startTime >= endTime) {
-    throw new AppError("Giờ bắt đầu phải nhỏ hơn giờ kết thúc", 400);
+    throw new AppError(
+      "Giờ bắt đầu phải nhỏ hơn giờ kết thúc",
+      400
+    );
   }
 
   if (slotDuration <= 0) {
-    throw new AppError("Thời lượng mỗi slot phải lớn hơn 0", 400);
+    throw new AppError(
+      "Thời lượng mỗi slot phải lớn hơn 0",
+      400
+    );
+  }
+
+  const overlappingSchedule =
+    await prisma.workingSchedule.findFirst({
+      where: {
+        doctorId: doctor.id,
+        dayOfWeek,
+        isActive: true,
+        id: {
+          not: scheduleId,
+        },
+        startTime: {
+          lt: endTime,
+        },
+        endTime: {
+          gt: startTime,
+        },
+      },
+    });
+
+  if (overlappingSchedule) {
+    throw new AppError(
+      "Khung giờ làm việc bị trùng với lịch hiện có",
+      409
+    );
   }
 
   return prisma.workingSchedule.update({
@@ -145,18 +249,26 @@ export async function updateMySchedule(
   });
 }
 
-export async function toggleMySchedule(userId: number, scheduleId: number) {
-  const doctor = await getDoctorByUserId(userId);
+export async function toggleMySchedule(
+  userId: number,
+  scheduleId: number
+) {
+  const doctor =
+    await getDoctorByUserId(userId);
 
-  const schedule = await prisma.workingSchedule.findFirst({
-    where: {
-      id: scheduleId,
-      doctorId: doctor.id,
-    },
-  });
+  const schedule =
+    await prisma.workingSchedule.findFirst({
+      where: {
+        id: scheduleId,
+        doctorId: doctor.id,
+      },
+    });
 
   if (!schedule) {
-    throw new AppError("Không tìm thấy lịch làm việc", 404);
+    throw new AppError(
+      "Không tìm thấy lịch làm việc",
+      404
+    );
   }
 
   return prisma.workingSchedule.update({
@@ -164,23 +276,69 @@ export async function toggleMySchedule(userId: number, scheduleId: number) {
       id: scheduleId,
     },
     data: {
-      isActive: !schedule.isActive,
+      isActive:
+        !schedule.isActive,
     },
   });
 }
 
-export async function createBlockedSlot(userId: number, input: BlockSlotInput) {
-  const doctor = await getDoctorByUserId(userId);
+export async function deleteMySchedule(
+  userId: number,
+  scheduleId: number
+) {
+  const doctor =
+    await getDoctorByUserId(userId);
 
-  const startAt = new Date(input.startAt);
-  const endAt = new Date(input.endAt);
+  const schedule =
+    await prisma.workingSchedule.findFirst({
+      where: {
+        id: scheduleId,
+        doctorId: doctor.id,
+      },
+    });
 
-  if (Number.isNaN(startAt.getTime()) || Number.isNaN(endAt.getTime())) {
-    throw new AppError("Ngày giờ không hợp lệ", 400);
+  if (!schedule) {
+    throw new AppError(
+      "Không tìm thấy lịch làm việc",
+      404
+    );
+  }
+
+  await prisma.workingSchedule.delete({
+    where: {
+      id: scheduleId,
+    },
+  });
+}
+
+export async function createBlockedSlot(
+  userId: number,
+  input: BlockSlotInput
+) {
+  const doctor =
+    await getDoctorByUserId(userId);
+
+  const startAt =
+    new Date(input.startAt);
+
+  const endAt =
+    new Date(input.endAt);
+
+  if (
+    Number.isNaN(startAt.getTime()) ||
+    Number.isNaN(endAt.getTime())
+  ) {
+    throw new AppError(
+      "Ngày giờ không hợp lệ",
+      400
+    );
   }
 
   if (startAt >= endAt) {
-    throw new AppError("Thời gian bắt đầu phải trước thời gian kết thúc", 400);
+    throw new AppError(
+      "Thời gian bắt đầu phải trước thời gian kết thúc",
+      400
+    );
   }
 
   return prisma.blockedSlot.create({
@@ -193,8 +351,11 @@ export async function createBlockedSlot(userId: number, input: BlockSlotInput) {
   });
 }
 
-export async function getMyBlockedSlots(userId: number) {
-  const doctor = await getDoctorByUserId(userId);
+export async function getMyBlockedSlots(
+  userId: number
+) {
+  const doctor =
+    await getDoctorByUserId(userId);
 
   return prisma.blockedSlot.findMany({
     where: {
@@ -206,18 +367,26 @@ export async function getMyBlockedSlots(userId: number) {
   });
 }
 
-export async function deleteBlockedSlot(userId: number, blockedSlotId: number) {
-  const doctor = await getDoctorByUserId(userId);
+export async function deleteBlockedSlot(
+  userId: number,
+  blockedSlotId: number
+) {
+  const doctor =
+    await getDoctorByUserId(userId);
 
-  const blockedSlot = await prisma.blockedSlot.findFirst({
-    where: {
-      id: blockedSlotId,
-      doctorId: doctor.id,
-    },
-  });
+  const blockedSlot =
+    await prisma.blockedSlot.findFirst({
+      where: {
+        id: blockedSlotId,
+        doctorId: doctor.id,
+      },
+    });
 
   if (!blockedSlot) {
-    throw new AppError("Không tìm thấy khung giờ đã chặn", 404);
+    throw new AppError(
+      "Không tìm thấy khung giờ đã chặn",
+      404
+    );
   }
 
   await prisma.blockedSlot.delete({
