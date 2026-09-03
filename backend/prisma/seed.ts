@@ -14,22 +14,18 @@ const prisma = new PrismaClient({
 async function main() {
   console.log("🚀 Start seeding...");
 
-  
   const password = await bcrypt.hash("123456", 10);
 
- 
   const noiKhoa = await prisma.specialty.upsert({
     where: {
       name: "Nội khoa",
     },
     update: {
-      description:
-        "Khám và điều trị các bệnh lý nội khoa tổng quát",
+      description: "Khám và điều trị các bệnh lý nội khoa tổng quát",
     },
     create: {
       name: "Nội khoa",
-      description:
-        "Khám và điều trị các bệnh lý nội khoa tổng quát",
+      description: "Khám và điều trị các bệnh lý nội khoa tổng quát",
     },
   });
 
@@ -53,13 +49,11 @@ async function main() {
       name: "Nhi khoa",
     },
     update: {
-      description:
-        "Khám và điều trị các bệnh lý ở trẻ em",
+      description: "Khám và điều trị các bệnh lý ở trẻ em",
     },
     create: {
       name: "Nhi khoa",
-      description:
-        "Khám và điều trị các bệnh lý ở trẻ em",
+      description: "Khám và điều trị các bệnh lý ở trẻ em",
     },
   });
 
@@ -68,13 +62,11 @@ async function main() {
       name: "Da liễu",
     },
     update: {
-      description:
-        "Khám và điều trị các bệnh lý về da, tóc và móng",
+      description: "Khám và điều trị các bệnh lý về da, tóc và móng",
     },
     create: {
       name: "Da liễu",
-      description:
-        "Khám và điều trị các bệnh lý về da, tóc và móng",
+      description: "Khám và điều trị các bệnh lý về da, tóc và móng",
     },
   });
 
@@ -83,13 +75,11 @@ async function main() {
       name: "Thần kinh",
     },
     update: {
-      description:
-        "Khám các bệnh lý liên quan đến hệ thần kinh",
+      description: "Khám các bệnh lý liên quan đến hệ thần kinh",
     },
     create: {
       name: "Thần kinh",
-      description:
-        "Khám các bệnh lý liên quan đến hệ thần kinh",
+      description: "Khám các bệnh lý liên quan đến hệ thần kinh",
     },
   });
 
@@ -98,20 +88,16 @@ async function main() {
       name: "Tim mạch",
     },
     update: {
-      description:
-        "Khám và điều trị các bệnh lý tim mạch",
+      description: "Khám và điều trị các bệnh lý tim mạch",
     },
     create: {
       name: "Tim mạch",
-      description:
-        "Khám và điều trị các bệnh lý tim mạch",
+      description: "Khám và điều trị các bệnh lý tim mạch",
     },
   });
 
   console.log("✅ Seed specialties thành công");
 
- 
-
   await prisma.user.upsert({
     where: {
       email: "admin@gmail.com",
@@ -130,8 +116,6 @@ async function main() {
     },
   });
 
-
-
   await prisma.user.upsert({
     where: {
       email: "receptionist@gmail.com",
@@ -149,8 +133,6 @@ async function main() {
       role: "RECEPTIONIST",
     },
   });
-
- 
 
   await prisma.user.upsert({
     where: {
@@ -173,8 +155,6 @@ async function main() {
       role: "PATIENT",
     },
   });
-
-  
 
   const doctorUser1 = await prisma.user.upsert({
     where: {
@@ -240,8 +220,6 @@ async function main() {
     },
   });
 
-  
-
   const doctorUser2 = await prisma.user.upsert({
     where: {
       email: "doctor2@gmail.com",
@@ -306,8 +284,6 @@ async function main() {
     },
   });
 
- 
-
   const doctorUser3 = await prisma.user.upsert({
     where: {
       email: "doctor3@gmail.com",
@@ -357,8 +333,6 @@ async function main() {
       specialtyId: thanKinh.id,
     },
   });
-
-  
 
   const doctorUser4 = await prisma.user.upsert({
     where: {
@@ -410,8 +384,6 @@ async function main() {
     },
   });
 
- 
-
   const doctorUser5 = await prisma.user.upsert({
     where: {
       email: "doctor5@gmail.com",
@@ -461,8 +433,6 @@ async function main() {
       specialtyId: timMach.id,
     },
   });
-
-  
 
   const doctorUser6 = await prisma.user.upsert({
     where: {
@@ -514,7 +484,6 @@ async function main() {
     },
   });
 
- 
   const doctorUser7 = await prisma.user.upsert({
     where: {
       email: "doctor7@gmail.com",
@@ -565,7 +534,6 @@ async function main() {
     },
   });
 
-  
   const doctorUser8 = await prisma.user.upsert({
     where: {
       email: "doctor8@gmail.com",
@@ -618,7 +586,6 @@ async function main() {
 
   console.log("✅ Seed doctors thành công");
 
- 
   const doctors = [
     doctor1,
     doctor2,
@@ -631,23 +598,20 @@ async function main() {
   ];
 
   for (const doctor of doctors) {
-    
     await prisma.workingSchedule.deleteMany({
       where: {
         doctorId: doctor.id,
       },
     });
 
-    const schedules = [1, 2, 3, 4, 5].map(
-      (dayOfWeek) => ({
-        doctorId: doctor.id,
-        dayOfWeek,
-        startTime: "08:00",
-        endTime: "17:00",
-        slotDuration: 30,
-        isActive: true,
-      })
-    );
+    const schedules = [1, 2, 3, 4, 5].map((dayOfWeek) => ({
+      doctorId: doctor.id,
+      dayOfWeek,
+      startTime: "08:00",
+      endTime: "17:00",
+      slotDuration: 30,
+      isActive: true,
+    }));
 
     await prisma.workingSchedule.createMany({
       data: schedules,
@@ -656,7 +620,6 @@ async function main() {
 
   console.log("✅ Seed working schedules thành công");
 
- 
   console.log("");
   console.log("========================================");
   console.log("✅ SEED COMPLETED SUCCESSFULLY");
@@ -678,10 +641,8 @@ async function main() {
   console.log("Doctor 6: doctor6@gmail.com");
   console.log("Doctor 7: doctor7@gmail.com");
   console.log("Doctor 8: doctor8@gmail.com");
-
   console.log("");
   console.log("🏥 Specialties:");
-
   console.log([
     noiKhoa.name,
     noiTongQuat.name,
@@ -693,7 +654,6 @@ async function main() {
 
   console.log("");
   console.log("👨‍⚕️ Doctors:");
-
   console.log([
     doctorUser1.name,
     doctorUser2.name,

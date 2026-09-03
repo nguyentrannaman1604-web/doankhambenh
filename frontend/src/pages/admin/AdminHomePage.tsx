@@ -1,11 +1,4 @@
-import {
-  Box,
-  Button,
-  Chip,
-  Container,
-  Paper,
-  Typography,
-} from "@mui/material";
+import { Box, Button, Chip, Container, Paper, Typography } from "@mui/material";
 
 import {
   CalendarMonth,
@@ -25,8 +18,7 @@ function AdminHomePage() {
 
   const { user } = useAuth();
 
-  const isAdmin =
-    user?.role === "ADMIN";
+  const isAdmin = user?.role === "ADMIN";
 
   return (
     <Box
@@ -36,10 +28,6 @@ function AdminHomePage() {
         bgcolor: "#f7fbff",
       }}
     >
-      {/* =========================
-          HERO
-      ========================== */}
-
       <Box
         sx={{
           background:
@@ -71,11 +59,7 @@ function AdminHomePage() {
           >
             <Box>
               <Chip
-                label={
-                  isAdmin
-                    ? "KHU VỰC QUẢN TRỊ"
-                    : "KHU VỰC LỄ TÂN"
-                }
+                label={isAdmin ? "KHU VỰC QUẢN TRỊ" : "KHU VỰC LỄ TÂN"}
                 sx={{
                   mb: 2,
 
@@ -134,24 +118,15 @@ function AdminHomePage() {
                   mb: 4,
                 }}
               >
-                Quản lý bác sĩ, chuyên
-                khoa, lịch hẹn và theo
-                dõi hoạt động của PHÒNG
-                KHÁM PANDA trên một hệ
-                thống tập trung.
+                Quản lý bác sĩ, chuyên khoa, lịch hẹn và theo dõi hoạt động của
+                PHÒNG KHÁM PANDA trên một hệ thống tập trung.
               </Typography>
 
               <Button
                 variant="contained"
                 size="large"
-                startIcon={
-                  <CalendarMonth />
-                }
-                onClick={() =>
-                  navigate(
-                    "/admin/appointments"
-                  )
-                }
+                startIcon={<CalendarMonth />}
+                onClick={() => navigate("/admin/appointments")}
                 sx={{
                   px: 4,
                   py: 1.5,
@@ -179,14 +154,11 @@ function AdminHomePage() {
 
                 borderRadius: 5,
 
-                bgcolor:
-                  "rgba(255,255,255,0.92)",
+                bgcolor: "rgba(255,255,255,0.92)",
 
-                border:
-                  "1px solid rgba(22,135,201,0.12)",
+                border: "1px solid rgba(22,135,201,0.12)",
 
-                boxShadow:
-                  "0 20px 60px rgba(23,92,135,0.12)",
+                boxShadow: "0 20px 60px rgba(23,92,135,0.12)",
               }}
             >
               <Box
@@ -201,8 +173,7 @@ function AdminHomePage() {
 
                   display: "flex",
 
-                  justifyContent:
-                    "center",
+                  justifyContent: "center",
 
                   alignItems: "center",
 
@@ -232,15 +203,12 @@ function AdminHomePage() {
                   mb: 1,
                 }}
               >
-                {isAdmin
-                  ? "Quản trị hệ thống"
-                  : "Quản lý lễ tân"}
+                {isAdmin ? "Quản trị hệ thống" : "Quản lý lễ tân"}
               </Typography>
 
               <Typography
                 sx={{
-                  color:
-                    "text.secondary",
+                  color: "text.secondary",
 
                   textAlign: "center",
 
@@ -255,10 +223,6 @@ function AdminHomePage() {
           </Box>
         </Container>
       </Box>
-
-      {/* =========================
-          MANAGEMENT
-      ========================== */}
 
       <Container
         maxWidth="lg"
@@ -291,12 +255,10 @@ function AdminHomePage() {
             sx={{
               mt: 1,
 
-              color:
-                "text.secondary",
+              color: "text.secondary",
             }}
           >
-            Truy cập nhanh các khu vực
-            quản lý chính.
+            Truy cập nhanh các khu vực quản lý chính.
           </Typography>
         </Box>
 
@@ -318,39 +280,23 @@ function AdminHomePage() {
             title="Bác sĩ"
             description="Quản lý thông tin bác sĩ đang làm việc tại phòng khám."
             button="Quản lý bác sĩ"
-            onClick={() =>
-              navigate(
-                "/admin/doctors"
-              )
-            }
+            onClick={() => navigate("/admin/doctors")}
           />
 
           <AdminCard
-            icon={
-              <MedicalServices />
-            }
+            icon={<MedicalServices />}
             title="Chuyên khoa"
             description="Quản lý danh sách chuyên khoa của phòng khám."
             button="Quản lý chuyên khoa"
-            onClick={() =>
-              navigate(
-                "/admin/specialties"
-              )
-            }
+            onClick={() => navigate("/admin/specialties")}
           />
 
           <AdminCard
-            icon={
-              <CalendarMonth />
-            }
+            icon={<CalendarMonth />}
             title="Lịch hẹn"
             description="Xem, lọc, xác nhận và hủy các lịch khám."
             button="Xem lịch hẹn"
-            onClick={() =>
-              navigate(
-                "/admin/appointments"
-              )
-            }
+            onClick={() => navigate("/admin/appointments")}
           />
 
           <AdminCard
@@ -358,18 +304,10 @@ function AdminHomePage() {
             title="Thống kê"
             description="Theo dõi số lượng lịch khám và bác sĩ được đặt nhiều."
             button="Xem thống kê"
-            onClick={() =>
-              navigate(
-                "/admin/statistics"
-              )
-            }
+            onClick={() => navigate("/admin/statistics")}
           />
         </Box>
       </Container>
-
-      {/* =========================
-          WORKFLOW
-      ========================== */}
 
       <Box
         sx={{
@@ -434,10 +372,6 @@ function AdminHomePage() {
         </Container>
       </Box>
 
-      {/* =========================
-          ADMIN NOTICE
-      ========================== */}
-
       <Container
         maxWidth="lg"
         sx={{
@@ -457,8 +391,7 @@ function AdminHomePage() {
 
             borderRadius: 4,
 
-            background:
-              "linear-gradient(135deg, #0c78b7 0%, #27a5c7 100%)",
+            background: "linear-gradient(135deg, #0c78b7 0%, #27a5c7 100%)",
 
             color: "white",
 
@@ -474,8 +407,7 @@ function AdminHomePage() {
               md: "center",
             },
 
-            justifyContent:
-              "space-between",
+            justifyContent: "space-between",
 
             gap: 3,
           }}
@@ -507,21 +439,15 @@ function AdminHomePage() {
                 maxWidth: 650,
               }}
             >
-              Hệ thống hỗ trợ quản lý
-              bác sĩ, bệnh nhân và lịch
-              khám thuận tiện trên một
-              nền tảng duy nhất.
+              Hệ thống hỗ trợ quản lý bác sĩ, bệnh nhân và lịch khám thuận tiện
+              trên một nền tảng duy nhất.
             </Typography>
           </Box>
 
           <Button
             variant="contained"
             size="large"
-            onClick={() =>
-              navigate(
-                "/admin/appointments"
-              )
-            }
+            onClick={() => navigate("/admin/appointments")}
             sx={{
               bgcolor: "white",
 
@@ -550,10 +476,6 @@ function AdminHomePage() {
   );
 }
 
-/* =========================
-   ADMIN CARD
-========================== */
-
 interface AdminCardProps {
   icon: React.ReactNode;
   title: string;
@@ -581,18 +503,14 @@ function AdminCard({
 
         bgcolor: "white",
 
-        border:
-          "1px solid #e8eef3",
+        border: "1px solid #e8eef3",
 
-        transition:
-          "0.2s ease",
+        transition: "0.2s ease",
 
         "&:hover": {
-          transform:
-            "translateY(-5px)",
+          transform: "translateY(-5px)",
 
-          boxShadow:
-            "0 14px 35px rgba(25,89,130,0.10)",
+          boxShadow: "0 14px 35px rgba(25,89,130,0.10)",
         },
       }}
     >
@@ -612,8 +530,7 @@ function AdminCard({
 
           alignItems: "center",
 
-          justifyContent:
-            "center",
+          justifyContent: "center",
 
           mb: 2,
 
@@ -640,8 +557,7 @@ function AdminCard({
 
       <Typography
         sx={{
-          color:
-            "text.secondary",
+          color: "text.secondary",
 
           lineHeight: 1.7,
 
@@ -672,21 +588,13 @@ function AdminCard({
   );
 }
 
-/* =========================
-   ADMIN STEP
-========================== */
-
 interface AdminStepProps {
   number: string;
   title: string;
   description: string;
 }
 
-function AdminStep({
-  number,
-  title,
-  description,
-}: AdminStepProps) {
+function AdminStep({ number, title, description }: AdminStepProps) {
   return (
     <Paper
       variant="outlined"
@@ -706,8 +614,7 @@ function AdminStep({
 
           fontWeight: 900,
 
-          color:
-            "rgba(22,135,201,0.15)",
+          color: "rgba(22,135,201,0.15)",
 
           mb: 2,
         }}
@@ -730,8 +637,7 @@ function AdminStep({
 
       <Typography
         sx={{
-          color:
-            "text.secondary",
+          color: "text.secondary",
 
           lineHeight: 1.8,
         }}

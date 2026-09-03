@@ -30,7 +30,7 @@ function Footer() {
             gap: 5,
           }}
         >
-          {/* CỘT 1 */}
+         
           <Box>
             <Typography
               variant="h5"
@@ -66,7 +66,7 @@ function Footer() {
             </Typography>
           </Box>
 
-          {/* CỘT 2 */}
+      
           <Box>
             <Typography
               variant="h6"
@@ -99,7 +99,6 @@ function Footer() {
             </Typography>
           </Box>
 
-          {/* CỘT 3 */}
           <Box>
             <Typography
               variant="h6"

@@ -1,5 +1,4 @@
 import api from "../api/axiosClient";
-
 import type {
   Doctor,
   DoctorDetailResponse,
@@ -11,8 +10,6 @@ interface DoctorListResponse {
   message?: string;
   data: Doctor[];
 }
-
-
 
 export async function getDoctors(
   specialtyId?: number
@@ -32,8 +29,6 @@ export async function getDoctors(
   return response.data;
 }
 
-
-
 export async function getDoctorById(
   doctorId: number
 ) {
@@ -44,8 +39,6 @@ export async function getDoctorById(
 
   return response.data;
 }
-
-
 
 export async function getDoctorAvailability(
   doctorId: number,

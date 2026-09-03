@@ -1,5 +1,4 @@
 import * as yup from "yup";
-
 export const blockedSlotSchema =
   yup.object({
     date: yup

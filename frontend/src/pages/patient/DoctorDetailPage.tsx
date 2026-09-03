@@ -1,13 +1,6 @@
-import {
-  useEffect,
-  useMemo,
-  useState,
-} from "react";
+import { useEffect, useMemo, useState } from "react";
 
-import {
-  useNavigate,
-  useParams,
-} from "react-router-dom";
+import { useNavigate, useParams } from "react-router-dom";
 
 import {
   Alert,
@@ -27,671 +20,270 @@ import ChevronLeftIcon from "@mui/icons-material/ChevronLeft";
 import ChevronRightIcon from "@mui/icons-material/ChevronRight";
 import TodayIcon from "@mui/icons-material/Today";
 
-import dayjs, {
-  type Dayjs,
-} from "dayjs";
+import dayjs, { type Dayjs } from "dayjs";
 
 import "dayjs/locale/vi";
 
-import type {
-  AvailabilitySlot,
-  Doctor,
-} from "../../types/doctor";
+import type { AvailabilitySlot, Doctor } from "../../types/doctor";
 
 import {
   getDoctorAvailability,
   getDoctorById,
 } from "../../services/doctorService";
 
-import {
-  createAppointment,
-} from "../../services/appointmentService";
+import { createAppointment } from "../../services/appointmentService";
 
-import type {
-  Review,
-} from "../../types/review";
+import type { Review } from "../../types/review";
 
-import {
-  getDoctorReviews,
-} from "../../services/reviewService";
+import { getDoctorReviews } from "../../services/reviewService";
 
 dayjs.locale("vi");
 
-/*
- * ==========================
- * TÊN THỨ
- * ==========================
- */
+const weekDays = ["T2", "T3", "T4", "T5", "T6", "T7", "CN"];
 
-const weekDays = [
-  "T2",
-  "T3",
-  "T4",
-  "T5",
-  "T6",
-  "T7",
-  "CN",
-];
-
-/*
- * ==========================
- * NGÀY LỄ CỐ ĐỊNH
- * ==========================
- */
-
-const fixedHolidays: Record<
-  string,
-  string
-> = {
+const fixedHolidays: Record<string, string> = {
   "01-01": "Tết Dương lịch",
 
-  "04-30":
-    "Ngày Giải phóng miền Nam",
+  "04-30": "Ngày Giải phóng miền Nam",
 
-  "05-01":
-    "Ngày Quốc tế Lao động",
+  "05-01": "Ngày Quốc tế Lao động",
 
-  "09-02":
-    "Ngày Quốc khánh",
+  "09-02": "Ngày Quốc khánh",
 };
 
-/*
- * ==========================
- * NGÀY LỄ THEO TỪNG NĂM
- *
- * Có thể bổ sung:
- * - Tết Nguyên Đán
- * - Giỗ Tổ Hùng Vương
- * - Ngày nghỉ bù
- * ==========================
- */
+const specialHolidays: Record<string, string> = {};
 
-const specialHolidays: Record<
-  string,
-  string
-> = {};
+function getHolidayName(date: Dayjs): string | null {
+  const fullDate = date.format("YYYY-MM-DD");
 
-/*
- * ==========================
- * LẤY TÊN NGÀY LỄ
- * ==========================
- */
-
-function getHolidayName(
-  date: Dayjs
-): string | null {
-  const fullDate =
-    date.format(
-      "YYYY-MM-DD"
-    );
-
-  if (
-    specialHolidays[
-      fullDate
-    ]
-  ) {
-    return specialHolidays[
-      fullDate
-    ];
+  if (specialHolidays[fullDate]) {
+    return specialHolidays[fullDate];
   }
 
-  const monthDay =
-    date.format("MM-DD");
+  const monthDay = date.format("MM-DD");
 
-  if (
-    fixedHolidays[
-      monthDay
-    ]
-  ) {
-    return fixedHolidays[
-      monthDay
-    ];
+  if (fixedHolidays[monthDay]) {
+    return fixedHolidays[monthDay];
   }
 
   return null;
 }
 
-/*
- * ==========================
- * DOCTOR DETAIL PAGE
- * ==========================
- */
-
 function DoctorDetailPage() {
-  const {
-    id,
-  } = useParams();
+  const { id } = useParams();
 
-  const doctorId =
-    Number(id);
+  const doctorId = Number(id);
 
-  const navigate =
-    useNavigate();
+  const navigate = useNavigate();
 
-  /*
-   * ==========================
-   * DOCTOR
-   * ==========================
-   */
+  const [doctor, setDoctor] = useState<Doctor | null>(null);
 
-  const [
-    doctor,
-    setDoctor,
-  ] = useState<
-    Doctor | null
-  >(null);
+  const [currentMonth, setCurrentMonth] = useState(dayjs().startOf("month"));
 
-  /*
-   * ==========================
-   * CALENDAR
-   * ==========================
-   */
+  const [selectedDate, setSelectedDate] = useState("");
 
-  const [
-    currentMonth,
-    setCurrentMonth,
-  ] = useState(
-    dayjs().startOf(
-      "month"
-    )
+  const [slots, setSlots] = useState<AvailabilitySlot[]>([]);
+
+  const [selectedSlot, setSelectedSlot] = useState<AvailabilitySlot | null>(
+    null,
   );
 
-  const [
-    selectedDate,
-    setSelectedDate,
-  ] = useState("");
+  const [loading, setLoading] = useState(true);
 
-  /*
-   * ==========================
-   * SLOT
-   * ==========================
-   */
+  const [loadingSlots, setLoadingSlots] = useState(false);
 
-  const [
-    slots,
-    setSlots,
-  ] = useState<
-    AvailabilitySlot[]
-  >([]);
+  const [error, setError] = useState("");
 
-  const [
-    selectedSlot,
-    setSelectedSlot,
-  ] = useState<
-    AvailabilitySlot | null
-  >(null);
+  const [booking, setBooking] = useState(false);
 
-  /*
-   * ==========================
-   * LOADING / ERROR
-   * ==========================
-   */
+  const [bookingSuccess, setBookingSuccess] = useState("");
 
-  const [
-    loading,
-    setLoading,
-  ] = useState(true);
+  const [bookingError, setBookingError] = useState("");
 
-  const [
-    loadingSlots,
-    setLoadingSlots,
-  ] = useState(false);
+  const [reviews, setReviews] = useState<Review[]>([]);
 
-  const [
-    error,
-    setError,
-  ] = useState("");
-
-  /*
-   * ==========================
-   * BOOKING
-   * ==========================
-   */
-
-  const [
-    booking,
-    setBooking,
-  ] = useState(false);
-
-  const [
-    bookingSuccess,
-    setBookingSuccess,
-  ] = useState("");
-
-  const [
-    bookingError,
-    setBookingError,
-  ] = useState("");
-
-  /*
-   * ==========================
-   * REVIEWS
-   * ==========================
-   */
-
-  const [
-    reviews,
-    setReviews,
-  ] = useState<
-    Review[]
-  >([]);
-
-  const [
-    reviewLoading,
-    setReviewLoading,
-  ] = useState(false);
-
-  /*
-   * ==========================
-   * LOAD DOCTOR
-   * ==========================
-   */
+  const [reviewLoading, setReviewLoading] = useState(false);
 
   useEffect(() => {
-    const loadDoctor =
-      async () => {
-        try {
-          setLoading(true);
+    const loadDoctor = async () => {
+      try {
+        setLoading(true);
 
-          setError("");
+        setError("");
 
-          const response =
-            await getDoctorById(
-              doctorId
-            );
+        const response = await getDoctorById(doctorId);
 
-          setDoctor(
-            response.data
-          );
-        } catch (error) {
-          console.error(
-            "Load doctor error:",
-            error
-          );
+        setDoctor(response.data);
+      } catch (error) {
+        console.error("Load doctor error:", error);
 
-          setError(
-            "Không thể tải thông tin bác sĩ"
-          );
-        } finally {
-          setLoading(false);
-        }
-      };
+        setError("Không thể tải thông tin bác sĩ");
+      } finally {
+        setLoading(false);
+      }
+    };
 
-    if (
-      Number.isInteger(
-        doctorId
-      ) &&
-      doctorId > 0
-    ) {
+    if (Number.isInteger(doctorId) && doctorId > 0) {
       loadDoctor();
     } else {
-      setError(
-        "Mã bác sĩ không hợp lệ"
-      );
+      setError("Mã bác sĩ không hợp lệ");
 
       setLoading(false);
     }
   }, [doctorId]);
 
-  /*
-   * ==========================
-   * LOAD AVAILABILITY
-   * ==========================
-   */
-
   useEffect(() => {
-    const loadAvailability =
-      async () => {
-        try {
-          setLoadingSlots(
-            true
-          );
-
-          setError("");
-
-          setSelectedSlot(
-            null
-          );
-
-          const response =
-            await getDoctorAvailability(
-              doctorId,
-              selectedDate
-            );
-
-          setSlots(
-            response.data.slots
-          );
-        } catch (error) {
-          console.error(
-            "Load availability error:",
-            error
-          );
-
-          setSlots([]);
-
-          setError(
-            "Không thể tải lịch trống của bác sĩ"
-          );
-        } finally {
-          setLoadingSlots(
-            false
-          );
-        }
-      };
-
-    if (
-      selectedDate &&
-      doctorId > 0
-    ) {
-      loadAvailability();
-    }
-  }, [
-    selectedDate,
-    doctorId,
-  ]);
-
-  /*
-   * ==========================
-   * LOAD REVIEWS
-   * ==========================
-   */
-
-  const loadReviews =
-    async (
-      doctorId: number
-    ) => {
+    const loadAvailability = async () => {
       try {
-        setReviewLoading(
-          true
-        );
+        setLoadingSlots(true);
 
-        const response =
-          await getDoctorReviews(
-            doctorId
-          );
+        setError("");
 
-        setReviews(
-          response.data
-        );
+        setSelectedSlot(null);
+
+        const response = await getDoctorAvailability(doctorId, selectedDate);
+
+        setSlots(response.data.slots);
       } catch (error) {
-        console.error(
-          "Load reviews:",
-          error
-        );
+        console.error("Load availability error:", error);
+
+        setSlots([]);
+
+        setError("Không thể tải lịch trống của bác sĩ");
       } finally {
-        setReviewLoading(
-          false
-        );
+        setLoadingSlots(false);
       }
     };
 
+    if (selectedDate && doctorId > 0) {
+      loadAvailability();
+    }
+  }, [selectedDate, doctorId]);
+
+  const loadReviews = async (doctorId: number) => {
+    try {
+      setReviewLoading(true);
+
+      const response = await getDoctorReviews(doctorId);
+
+      setReviews(response.data);
+    } catch (error) {
+      console.error("Load reviews:", error);
+    } finally {
+      setReviewLoading(false);
+    }
+  };
+
   useEffect(() => {
-    if (
-      Number.isInteger(
-        doctorId
-      ) &&
-      doctorId > 0
-    ) {
-      loadReviews(
-        doctorId
-      );
+    if (Number.isInteger(doctorId) && doctorId > 0) {
+      loadReviews(doctorId);
     }
   }, [doctorId]);
 
-  /*
-   * ==========================
-   * TẠO CALENDAR DAYS
-   * ==========================
-   */
+  const calendarDays = useMemo(() => {
+    const startOfMonth = currentMonth.startOf("month");
 
-  const calendarDays =
-    useMemo(() => {
-      const startOfMonth =
-        currentMonth.startOf(
-          "month"
-        );
+    const endOfMonth = currentMonth.endOf("month");
 
-      const endOfMonth =
-        currentMonth.endOf(
-          "month"
-        );
+    const firstDay = startOfMonth.day();
 
-      const firstDay =
-        startOfMonth.day();
+    const daysBefore = firstDay === 0 ? 6 : firstDay - 1;
 
-      /*
-       * Calendar bắt đầu
-       * từ Thứ hai
-       */
+    const calendarStart = startOfMonth.subtract(daysBefore, "day");
 
-      const daysBefore =
-        firstDay === 0
-          ? 6
-          : firstDay - 1;
+    const lastDay = endOfMonth.day();
 
-      const calendarStart =
-        startOfMonth.subtract(
-          daysBefore,
-          "day"
-        );
+    const daysAfter = lastDay === 0 ? 0 : 7 - lastDay;
 
-      const lastDay =
-        endOfMonth.day();
+    const calendarEnd = endOfMonth.add(daysAfter, "day");
 
-      const daysAfter =
-        lastDay === 0
-          ? 0
-          : 7 - lastDay;
+    const days: Dayjs[] = [];
 
-      const calendarEnd =
-        endOfMonth.add(
-          daysAfter,
-          "day"
-        );
+    let currentDay = calendarStart;
 
-      const days: Dayjs[] =
-        [];
+    while (
+      currentDay.isBefore(calendarEnd, "day") ||
+      currentDay.isSame(calendarEnd, "day")
+    ) {
+      days.push(currentDay);
 
-      let currentDay =
-        calendarStart;
+      currentDay = currentDay.add(1, "day");
+    }
 
-      while (
-        currentDay.isBefore(
-          calendarEnd,
-          "day"
-        ) ||
-        currentDay.isSame(
-          calendarEnd,
-          "day"
-        )
-      ) {
-        days.push(
-          currentDay
-        );
+    return days;
+  }, [currentMonth]);
 
-        currentDay =
-          currentDay.add(
-            1,
-            "day"
-          );
-      }
+  const handleSelectDate = (date: Dayjs) => {
+    if (date.isBefore(dayjs().startOf("day"))) {
+      return;
+    }
 
-      return days;
-    }, [currentMonth]);
+    if (getHolidayName(date)) {
+      return;
+    }
 
-  /*
-   * ==========================
-   * CHỌN NGÀY
-   * ==========================
-   */
+    setSelectedDate(date.format("YYYY-MM-DD"));
 
-  const handleSelectDate =
-    (
-      date: Dayjs
-    ) => {
-      /*
-       * Không cho chọn
-       * ngày trong quá khứ
-       */
+    setBookingError("");
 
-      if (
-        date.isBefore(
-          dayjs().startOf(
-            "day"
-          )
-        )
-      ) {
-        return;
-      }
+    setBookingSuccess("");
+  };
 
-      /*
-       * Không cho đặt
-       * ngày lễ
-       */
+  const handlePreviousMonth = () => {
+    const previousMonth = currentMonth.subtract(1, "month");
 
-      if (
-        getHolidayName(
-          date
-        )
-      ) {
-        return;
-      }
+    if (previousMonth.endOf("month").isBefore(dayjs().startOf("month"))) {
+      return;
+    }
 
-      setSelectedDate(
-        date.format(
-          "YYYY-MM-DD"
-        )
-      );
+    setCurrentMonth(previousMonth);
+  };
+
+  const handleNextMonth = () => {
+    setCurrentMonth((previous) => previous.add(1, "month"));
+  };
+
+  const handleCurrentMonth = () => {
+    setCurrentMonth(dayjs().startOf("month"));
+  };
+
+  const handleBookAppointment = async () => {
+    if (!selectedSlot) {
+      setBookingError("Vui lòng chọn giờ khám");
+
+      return;
+    }
+
+    try {
+      setBooking(true);
 
       setBookingError("");
 
       setBookingSuccess("");
-    };
 
-  /*
-   * ==========================
-   * CHUYỂN THÁNG
-   * ==========================
-   */
+      await createAppointment({
+        doctorId,
 
-  const handlePreviousMonth =
-    () => {
-      const previousMonth =
-        currentMonth.subtract(
-          1,
-          "month"
-        );
+        startAt: selectedSlot.startAt,
 
-      /*
-       * Không cho lùi về
-       * tháng đã qua
-       */
+        endAt: selectedSlot.endAt,
+      });
 
-      if (
-        previousMonth.endOf(
-          "month"
-        ).isBefore(
-          dayjs().startOf(
-            "month"
-          )
-        )
-      ) {
-        return;
-      }
+      setBookingSuccess("Đặt lịch khám thành công");
 
-      setCurrentMonth(
-        previousMonth
+      setTimeout(() => {
+        navigate("/patient/appointments");
+      }, 1200);
+    } catch (error: any) {
+      console.error("Create appointment error:", error);
+
+      setBookingError(
+        error.response?.data?.message || "Không thể đặt lịch khám",
       );
-    };
-
-  const handleNextMonth =
-    () => {
-      setCurrentMonth(
-        (
-          previous
-        ) =>
-          previous.add(
-            1,
-            "month"
-          )
-      );
-    };
-
-  const handleCurrentMonth =
-    () => {
-      setCurrentMonth(
-        dayjs().startOf(
-          "month"
-        )
-      );
-    };
-
-  /*
-   * ==========================
-   * BOOK APPOINTMENT
-   * ==========================
-   */
-
-  const handleBookAppointment =
-    async () => {
-      if (!selectedSlot) {
-        setBookingError(
-          "Vui lòng chọn giờ khám"
-        );
-
-        return;
-      }
-
-      try {
-        setBooking(true);
-
-        setBookingError("");
-
-        setBookingSuccess("");
-
-        await createAppointment(
-          {
-            doctorId,
-
-            startAt:
-              selectedSlot.startAt,
-
-            endAt:
-              selectedSlot.endAt,
-          }
-        );
-
-        setBookingSuccess(
-          "Đặt lịch khám thành công"
-        );
-
-        setTimeout(() => {
-          navigate(
-            "/patient/appointments"
-          );
-        }, 1200);
-      } catch (error: any) {
-        console.error(
-          "Create appointment error:",
-          error
-        );
-
-        setBookingError(
-          error.response?.data
-            ?.message ||
-            "Không thể đặt lịch khám"
-        );
-      } finally {
-        setBooking(false);
-      }
-    };
-
-  /*
-   * ==========================
-   * LOADING
-   * ==========================
-   */
+    } finally {
+      setBooking(false);
+    }
+  };
 
   if (loading) {
     return (
@@ -701,11 +293,9 @@ function DoctorDetailPage() {
 
           display: "flex",
 
-          justifyContent:
-            "center",
+          justifyContent: "center",
 
-          alignItems:
-            "center",
+          alignItems: "center",
         }}
       >
         <CircularProgress />
@@ -713,27 +303,12 @@ function DoctorDetailPage() {
     );
   }
 
-  /*
-   * ==========================
-   * KHÔNG CÓ DOCTOR
-   * ==========================
-   */
-
   if (!doctor) {
-    return (
-      <Alert severity="error">
-        {error ||
-          "Không tìm thấy bác sĩ"}
-      </Alert>
-    );
+    return <Alert severity="error">{error || "Không tìm thấy bác sĩ"}</Alert>;
   }
 
   return (
     <Box>
-      {/* =====================
-          THÔNG TIN BÁC SĨ
-      ===================== */}
-
       <Paper
         elevation={2}
         sx={{
@@ -765,14 +340,8 @@ function DoctorDetailPage() {
           }}
         >
           <Avatar
-            src={
-              doctor.user
-                .avatar ||
-              undefined
-            }
-            alt={
-              doctor.user.name
-            }
+            src={doctor.user.avatar || undefined}
+            alt={doctor.user.name}
             sx={{
               width: 130,
 
@@ -781,9 +350,7 @@ function DoctorDetailPage() {
               fontSize: 40,
             }}
           >
-            {doctor.user.name
-              .charAt(0)
-              .toUpperCase()}
+            {doctor.user.name.charAt(0).toUpperCase()}
           </Avatar>
 
           <Box
@@ -806,8 +373,7 @@ function DoctorDetailPage() {
               sx={{
                 display: "flex",
 
-                alignItems:
-                  "center",
+                alignItems: "center",
 
                 gap: 1,
 
@@ -815,10 +381,7 @@ function DoctorDetailPage() {
               }}
             >
               <Rating
-                value={Number(
-                  doctor.rating ??
-                    0
-                )}
+                value={Number(doctor.rating ?? 0)}
                 precision={0.5}
                 readOnly
                 size="small"
@@ -827,24 +390,18 @@ function DoctorDetailPage() {
               <Typography
                 variant="body2"
                 sx={{
-                  color:
-                    "text.secondary",
+                  color: "text.secondary",
                 }}
               >
                 {doctor.rating
-                  ? `${Number(
-                      doctor.rating
-                    ).toFixed(
-                      1
-                    )}/5`
+                  ? `${Number(doctor.rating).toFixed(1)}/5`
                   : "Chưa có đánh giá"}
               </Typography>
             </Box>
 
             <Typography
               sx={{
-                color:
-                  "primary.main",
+                color: "primary.main",
 
                 fontWeight: 600,
 
@@ -853,14 +410,7 @@ function DoctorDetailPage() {
                 mb: 2,
               }}
             >
-              {doctor.specialties
-                .map(
-                  (item) =>
-                    item
-                      .specialty
-                      .name
-                )
-                .join(", ")}
+              {doctor.specialties.map((item) => item.specialty.name).join(", ")}
             </Typography>
 
             <Typography
@@ -868,32 +418,22 @@ function DoctorDetailPage() {
                 mb: 1,
               }}
             >
-              <strong>
-                Kinh nghiệm:
-              </strong>{" "}
-              {doctor.experience
-                ? `${doctor.experience} năm`
-                : "Đang cập nhật"}
+              <strong>Kinh nghiệm:</strong>{" "}
+              {doctor.experience ? `${doctor.experience} năm` : "Đang cập nhật"}
             </Typography>
 
             <Typography
               sx={{
-                color:
-                  "text.secondary",
+                color: "text.secondary",
 
                 lineHeight: 1.7,
               }}
             >
-              {doctor.bio ||
-                "Thông tin giới thiệu bác sĩ đang được cập nhật."}
+              {doctor.bio || "Thông tin giới thiệu bác sĩ đang được cập nhật."}
             </Typography>
           </Box>
         </Box>
       </Paper>
-
-      {/* =====================
-          CHỌN LỊCH KHÁM
-      ===================== */}
 
       <Paper
         elevation={2}
@@ -920,20 +460,14 @@ function DoctorDetailPage() {
 
         <Typography
           sx={{
-            color:
-              "text.secondary",
+            color: "text.secondary",
 
             mb: 3,
           }}
         >
-          Chọn ngày trực tiếp trên
-          lịch để xem các khung giờ
-          còn trống của bác sĩ.
+          Chọn ngày trực tiếp trên lịch để xem các khung giờ còn trống của bác
+          sĩ.
         </Typography>
-
-        {/* =====================
-            CALENDAR HEADER
-        ===================== */}
 
         <Box
           sx={{
@@ -949,8 +483,7 @@ function DoctorDetailPage() {
               sm: "center",
             },
 
-            justifyContent:
-              "space-between",
+            justifyContent: "space-between",
 
             gap: 2,
 
@@ -963,30 +496,21 @@ function DoctorDetailPage() {
               fontWeight: 700,
             }}
           >
-            Tháng{" "}
-            {currentMonth.format(
-              "MM/YYYY"
-            )}
+            Tháng {currentMonth.format("MM/YYYY")}
           </Typography>
 
           <Box
             sx={{
               display: "flex",
 
-              alignItems:
-                "center",
+              alignItems: "center",
 
               gap: 1,
             }}
           >
             <IconButton
-              onClick={
-                handlePreviousMonth
-              }
-              disabled={currentMonth.isSame(
-                dayjs(),
-                "month"
-              )}
+              onClick={handlePreviousMonth}
+              disabled={currentMonth.isSame(dayjs(), "month")}
               aria-label="Tháng trước"
             >
               <ChevronLeftIcon />
@@ -994,34 +518,20 @@ function DoctorDetailPage() {
 
             <Button
               variant="outlined"
-              startIcon={
-                <TodayIcon />
-              }
-              onClick={
-                handleCurrentMonth
-              }
+              startIcon={<TodayIcon />}
+              onClick={handleCurrentMonth}
               sx={{
-                textTransform:
-                  "none",
+                textTransform: "none",
               }}
             >
               Tháng hiện tại
             </Button>
 
-            <IconButton
-              onClick={
-                handleNextMonth
-              }
-              aria-label="Tháng sau"
-            >
+            <IconButton onClick={handleNextMonth} aria-label="Tháng sau">
               <ChevronRightIcon />
             </IconButton>
           </Box>
         </Box>
-
-        {/* =====================
-            CALENDAR
-        ===================== */}
 
         <Box
           sx={{
@@ -1042,8 +552,7 @@ function DoctorDetailPage() {
               sx={{
                 display: "grid",
 
-                gridTemplateColumns:
-                  "repeat(7, 1fr)",
+                gridTemplateColumns: "repeat(7, 1fr)",
 
                 gap: {
                   xs: 0.5,
@@ -1053,52 +562,37 @@ function DoctorDetailPage() {
                 mb: 1,
               }}
             >
-              {weekDays.map(
-                (
-                  day,
-                  index
-                ) => {
-                  const isWeekend =
-                    index === 5 ||
-                    index === 6;
+              {weekDays.map((day, index) => {
+                const isWeekend = index === 5 || index === 6;
 
-                  return (
-                    <Box
-                      key={day}
+                return (
+                  <Box
+                    key={day}
+                    sx={{
+                      py: 1,
+
+                      textAlign: "center",
+                    }}
+                  >
+                    <Typography
                       sx={{
-                        py: 1,
+                        fontWeight: 700,
 
-                        textAlign:
-                          "center",
+                        color: isWeekend ? "error.main" : "text.secondary",
                       }}
                     >
-                      <Typography
-                        sx={{
-                          fontWeight:
-                            700,
-
-                          color:
-                            isWeekend
-                              ? "error.main"
-                              : "text.secondary",
-                        }}
-                      >
-                        {day}
-                      </Typography>
-                    </Box>
-                  );
-                }
-              )}
+                      {day}
+                    </Typography>
+                  </Box>
+                );
+              })}
             </Box>
-
-            {/* NGÀY */}
 
             <Box
               sx={{
                 display: "grid",
 
-                gridTemplateColumns:
-                  "repeat(7, 1fr)",
+                gridTemplateColumns: "repeat(7, 1fr)",
 
                 gap: {
                   xs: 0.5,
@@ -1106,205 +600,131 @@ function DoctorDetailPage() {
                 },
               }}
             >
-              {calendarDays.map(
-                (date) => {
-                  const dateString =
-                    date.format(
-                      "YYYY-MM-DD"
-                    );
+              {calendarDays.map((date) => {
+                const dateString = date.format("YYYY-MM-DD");
 
-                  const isCurrentMonth =
-                    date.month() ===
-                    currentMonth.month();
+                const isCurrentMonth = date.month() === currentMonth.month();
 
-                  const isToday =
-                    date.isSame(
-                      dayjs(),
-                      "day"
-                    );
+                const isToday = date.isSame(dayjs(), "day");
 
-                  const isSelected =
-                    selectedDate ===
-                    dateString;
+                const isSelected = selectedDate === dateString;
 
-                  const isPast =
-                    date.isBefore(
-                      dayjs().startOf(
-                        "day"
-                      )
-                    );
+                const isPast = date.isBefore(dayjs().startOf("day"));
 
-                  const isWeekend =
-                    date.day() ===
-                      6 ||
-                    date.day() ===
-                      0;
+                const isWeekend = date.day() === 6 || date.day() === 0;
 
-                  const holidayName =
-                    getHolidayName(
-                      date
-                    );
+                const holidayName = getHolidayName(date);
 
-                  const isHoliday =
-                    !!holidayName;
+                const isHoliday = !!holidayName;
 
-                  const disabled =
-                    isPast ||
-                    isHoliday;
+                const disabled = isPast || isHoliday;
 
-                  return (
-                    <Button
-                      key={
-                        dateString
-                      }
-                      disabled={
-                        disabled
-                      }
-                      onClick={() =>
-                        handleSelectDate(
-                          date
-                        )
-                      }
-                      variant={
-                        isSelected
-                          ? "contained"
-                          : "outlined"
-                      }
-                      color={
-                        isSelected
-                          ? "primary"
-                          : isHoliday ||
-                              isWeekend
-                            ? "error"
-                            : "inherit"
-                      }
+                return (
+                  <Button
+                    key={dateString}
+                    disabled={disabled}
+                    onClick={() => handleSelectDate(date)}
+                    variant={isSelected ? "contained" : "outlined"}
+                    color={
+                      isSelected
+                        ? "primary"
+                        : isHoliday || isWeekend
+                          ? "error"
+                          : "inherit"
+                    }
+                    sx={{
+                      minWidth: 0,
+
+                      minHeight: {
+                        xs: 70,
+                        sm: 82,
+                      },
+
+                      p: 0.8,
+
+                      borderRadius: 2,
+
+                      textTransform: "none",
+
+                      display: "flex",
+
+                      flexDirection: "column",
+
+                      alignItems: "center",
+
+                      justifyContent: "center",
+
+                      opacity: !isCurrentMonth ? 0.35 : disabled ? 0.55 : 1,
+
+                      bgcolor:
+                        !isSelected && isHoliday
+                          ? "#fff1f1"
+                          : !isSelected && isWeekend
+                            ? "#fff8f8"
+                            : undefined,
+
+                      "&:hover": {
+                        bgcolor: isSelected
+                          ? undefined
+                          : isWeekend
+                            ? "#ffeded"
+                            : "action.hover",
+                      },
+                    }}
+                  >
+                    <Typography
                       sx={{
-                        minWidth: 0,
+                        fontWeight: isToday || isSelected ? 700 : 600,
 
-                        minHeight: {
-                          xs: 70,
-                          sm: 82,
-                        },
-
-                        p: 0.8,
-
-                        borderRadius:
-                          2,
-
-                        textTransform:
-                          "none",
-
-                        display:
-                          "flex",
-
-                        flexDirection:
-                          "column",
-
-                        alignItems:
-                          "center",
-
-                        justifyContent:
-                          "center",
-
-                        opacity:
-                          !isCurrentMonth
-                            ? 0.35
-                            : disabled
-                              ? 0.55
-                              : 1,
-
-                        bgcolor:
-                          !isSelected &&
-                          isHoliday
-                            ? "#fff1f1"
-                            : !isSelected &&
-                                isWeekend
-                              ? "#fff8f8"
-                              : undefined,
-
-                        "&:hover": {
-                          bgcolor:
-                            isSelected
-                              ? undefined
-                              : isWeekend
-                                ? "#ffeded"
-                                : "action.hover",
-                        },
+                        color: isSelected
+                          ? "inherit"
+                          : isHoliday || isWeekend
+                            ? "error.main"
+                            : "inherit",
                       }}
                     >
-                      <Typography
-                        sx={{
-                          fontWeight:
-                            isToday ||
-                            isSelected
-                              ? 700
-                              : 600,
+                      {date.format("DD")}
+                    </Typography>
 
-                          color:
-                            isSelected
-                              ? "inherit"
-                              : isHoliday ||
-                                  isWeekend
-                                ? "error.main"
-                                : "inherit",
+                    {isToday && (
+                      <Typography
+                        variant="caption"
+                        sx={{
+                          fontSize: 10,
+
+                          lineHeight: 1.2,
+
+                          color: isSelected ? "inherit" : "primary.main",
                         }}
                       >
-                        {date.format(
-                          "DD"
-                        )}
+                        Hôm nay
                       </Typography>
+                    )}
 
-                      {isToday && (
-                        <Typography
-                          variant="caption"
-                          sx={{
-                            fontSize:
-                              10,
+                    {isHoliday && (
+                      <Typography
+                        variant="caption"
+                        sx={{
+                          fontSize: 9,
 
-                            lineHeight:
-                              1.2,
+                          lineHeight: 1.1,
 
-                            color:
-                              isSelected
-                                ? "inherit"
-                                : "primary.main",
-                          }}
-                        >
-                          Hôm nay
-                        </Typography>
-                      )}
+                          color: "error.main",
 
-                      {isHoliday && (
-                        <Typography
-                          variant="caption"
-                          sx={{
-                            fontSize:
-                              9,
+                          mt: 0.3,
 
-                            lineHeight:
-                              1.1,
-
-                            color:
-                              "error.main",
-
-                            mt: 0.3,
-
-                            textAlign:
-                              "center",
-                          }}
-                        >
-                          Nghỉ lễ
-                        </Typography>
-                      )}
-                    </Button>
-                  );
-                }
-              )}
+                          textAlign: "center",
+                        }}
+                      >
+                        Nghỉ lễ
+                      </Typography>
+                    )}
+                  </Button>
+                );
+              })}
             </Box>
           </Box>
         </Box>
-
-        {/* CHÚ THÍCH */}
 
         <Box
           sx={{
@@ -1314,15 +734,10 @@ function DoctorDetailPage() {
 
             gap: 1,
 
-            flexWrap:
-              "wrap",
+            flexWrap: "wrap",
           }}
         >
-          <Chip
-            label="Ngày đã chọn"
-            color="primary"
-            size="small"
-          />
+          <Chip label="Ngày đã chọn" color="primary" size="small" />
 
           <Chip
             label="T7 / Chủ nhật"
@@ -1331,11 +746,7 @@ function DoctorDetailPage() {
             size="small"
           />
 
-          <Chip
-            label="Ngày lễ"
-            color="error"
-            size="small"
-          />
+          <Chip label="Ngày lễ" color="error" size="small" />
         </Box>
 
         <Divider
@@ -1344,21 +755,11 @@ function DoctorDetailPage() {
           }}
         />
 
-        {/* =====================
-            CHƯA CHỌN NGÀY
-        ===================== */}
-
         {!selectedDate && (
           <Alert severity="info">
-            Vui lòng chọn một ngày
-            trên lịch để xem giờ
-            khám còn trống.
+            Vui lòng chọn một ngày trên lịch để xem giờ khám còn trống.
           </Alert>
         )}
-
-        {/* =====================
-            NGÀY ĐÃ CHỌN
-        ===================== */}
 
         {selectedDate && (
           <Typography
@@ -1372,130 +773,82 @@ function DoctorDetailPage() {
             <Box
               component="span"
               sx={{
-                color:
-                  "primary.main",
+                color: "primary.main",
               }}
             >
-              {dayjs(
-                selectedDate
-              ).format(
-                "DD/MM/YYYY"
-              )}
+              {dayjs(selectedDate).format("DD/MM/YYYY")}
             </Box>
           </Typography>
         )}
 
-        {/* =====================
-            LOAD SLOT
-        ===================== */}
+        {selectedDate && loadingSlots && (
+          <Box
+            sx={{
+              py: 4,
 
-        {selectedDate &&
-          loadingSlots && (
+              display: "flex",
+
+              justifyContent: "center",
+            }}
+          >
+            <CircularProgress size={30} />
+          </Box>
+        )}
+
+        {selectedDate && !loadingSlots && slots.length > 0 && (
+          <>
+            <Typography
+              sx={{
+                fontWeight: 600,
+
+                mb: 2,
+              }}
+            >
+              Giờ khám còn trống
+            </Typography>
+
             <Box
               sx={{
-                py: 4,
-
                 display: "flex",
 
-                justifyContent:
-                  "center",
+                flexWrap: "wrap",
+
+                gap: 1.5,
               }}
             >
-              <CircularProgress
-                size={30}
-              />
+              {slots.map((slot) => (
+                <Button
+                  key={slot.startAt}
+                  variant={
+                    selectedSlot?.startAt === slot.startAt
+                      ? "contained"
+                      : "outlined"
+                  }
+                  disabled={!slot.available}
+                  onClick={() => setSelectedSlot(slot)}
+                  sx={{
+                    minWidth: 100,
+
+                    textTransform: "none",
+                  }}
+                >
+                  {slot.start}
+                </Button>
+              ))}
             </Box>
-          )}
+          </>
+        )}
 
-        {/* =====================
-            SLOT
-        ===================== */}
-
-        {selectedDate &&
-          !loadingSlots &&
-          slots.length > 0 && (
-            <>
-              <Typography
-                sx={{
-                  fontWeight:
-                    600,
-
-                  mb: 2,
-                }}
-              >
-                Giờ khám còn trống
-              </Typography>
-
-              <Box
-                sx={{
-                  display: "flex",
-
-                  flexWrap:
-                    "wrap",
-
-                  gap: 1.5,
-                }}
-              >
-                {slots.map(
-                  (slot) => (
-                    <Button
-                      key={
-                        slot.startAt
-                      }
-                      variant={
-                        selectedSlot
-                          ?.startAt ===
-                        slot.startAt
-                          ? "contained"
-                          : "outlined"
-                      }
-                      disabled={
-                        !slot.available
-                      }
-                      onClick={() =>
-                        setSelectedSlot(
-                          slot
-                        )
-                      }
-                      sx={{
-                        minWidth:
-                          100,
-
-                        textTransform:
-                          "none",
-                      }}
-                    >
-                      {slot.start}
-                    </Button>
-                  )
-                )}
-              </Box>
-            </>
-          )}
-
-        {/* =====================
-            KHÔNG CÓ SLOT
-        ===================== */}
-
-        {selectedDate &&
-          !loadingSlots &&
-          slots.length === 0 &&
-          !error && (
-            <Alert
-              severity="info"
-              sx={{
-                mt: 2,
-              }}
-            >
-              Bác sĩ không còn
-              khung giờ trống trong
-              ngày này.
-            </Alert>
-          )}
-
-        {/* =====================
-            ERROR
-        ===================== */}
+        {selectedDate && !loadingSlots && slots.length === 0 && !error && (
+          <Alert
+            severity="info"
+            sx={{
+              mt: 2,
+            }}
+          >
+            Bác sĩ không còn khung giờ trống trong ngày này.
+          </Alert>
+        )}
 
         {error && (
           <Alert
@@ -1508,10 +861,6 @@ function DoctorDetailPage() {
           </Alert>
         )}
 
-        {/* =====================
-            BOOK SUCCESS
-        ===================== */}
-
         {bookingSuccess && (
           <Alert
             severity="success"
@@ -1522,10 +871,6 @@ function DoctorDetailPage() {
             {bookingSuccess}
           </Alert>
         )}
-
-        {/* =====================
-            BOOK ERROR
-        ===================== */}
 
         {bookingError && (
           <Alert
@@ -1538,10 +883,6 @@ function DoctorDetailPage() {
           </Alert>
         )}
 
-        {/* =====================
-            XÁC NHẬN
-        ===================== */}
-
         {selectedSlot && (
           <Box
             sx={{
@@ -1549,8 +890,7 @@ function DoctorDetailPage() {
 
               p: 3,
 
-              bgcolor:
-                "#e3f2fd",
+              bgcolor: "#e3f2fd",
 
               borderRadius: 2,
             }}
@@ -1571,14 +911,7 @@ function DoctorDetailPage() {
                 mb: 1,
               }}
             >
-              Bác sĩ:{" "}
-              <strong>
-                BS.{" "}
-                {
-                  doctor.user
-                    .name
-                }
-              </strong>
+              Bác sĩ: <strong>BS. {doctor.user.name}</strong>
             </Typography>
 
             <Typography
@@ -1587,13 +920,7 @@ function DoctorDetailPage() {
               }}
             >
               Ngày khám:{" "}
-              <strong>
-                {dayjs(
-                  selectedDate
-                ).format(
-                  "DD/MM/YYYY"
-                )}
-              </strong>
+              <strong>{dayjs(selectedDate).format("DD/MM/YYYY")}</strong>
             </Typography>
 
             <Typography
@@ -1603,45 +930,30 @@ function DoctorDetailPage() {
             >
               Giờ khám:{" "}
               <strong>
-                {
-                  selectedSlot.start
-                }
+                {selectedSlot.start}
 
                 {" - "}
 
-                {
-                  selectedSlot.end
-                }
+                {selectedSlot.end}
               </strong>
             </Typography>
 
             <Button
               variant="contained"
               size="large"
-              onClick={
-                handleBookAppointment
-              }
-              disabled={
-                booking
-              }
+              onClick={handleBookAppointment}
+              disabled={booking}
               sx={{
-                textTransform:
-                  "none",
+                textTransform: "none",
 
                 minWidth: 180,
               }}
             >
-              {booking
-                ? "Đang đặt lịch..."
-                : "Đặt lịch khám"}
+              {booking ? "Đang đặt lịch..." : "Đặt lịch khám"}
             </Button>
           </Box>
         )}
       </Paper>
-
-      {/* =====================
-          REVIEWS
-      ===================== */}
 
       <Box
         sx={{
@@ -1661,14 +973,12 @@ function DoctorDetailPage() {
 
         <Typography
           sx={{
-            color:
-              "text.secondary",
+            color: "text.secondary",
 
             mb: 3,
           }}
         >
-          Nhận xét từ những bệnh
-          nhân đã khám với bác sĩ.
+          Nhận xét từ những bệnh nhân đã khám với bác sĩ.
         </Typography>
 
         {reviewLoading ? (
@@ -1676,103 +986,76 @@ function DoctorDetailPage() {
             sx={{
               display: "flex",
 
-              justifyContent:
-                "center",
+              justifyContent: "center",
 
               py: 4,
             }}
           >
             <CircularProgress />
           </Box>
-        ) : reviews.length ===
-          0 ? (
-          <Alert severity="info">
-            Bác sĩ chưa có đánh
-            giá.
-          </Alert>
+        ) : reviews.length === 0 ? (
+          <Alert severity="info">Bác sĩ chưa có đánh giá.</Alert>
         ) : (
           <Box
             sx={{
               display: "flex",
 
-              flexDirection:
-                "column",
+              flexDirection: "column",
 
               gap: 2,
             }}
           >
-            {reviews.map(
-              (review) => (
-                <Paper
-                  key={
-                    review.id
-                  }
-                  variant="outlined"
-                  sx={{
-                    p: 3,
+            {reviews.map((review) => (
+              <Paper
+                key={review.id}
+                variant="outlined"
+                sx={{
+                  p: 3,
 
-                    borderRadius:
-                      3,
+                  borderRadius: 3,
+                }}
+              >
+                <Box
+                  sx={{
+                    display: "flex",
+
+                    justifyContent: "space-between",
+
+                    alignItems: {
+                      xs: "flex-start",
+                      sm: "center",
+                    },
+
+                    flexDirection: {
+                      xs: "column",
+                      sm: "row",
+                    },
+
+                    gap: 1,
+
+                    mb: 2,
                   }}
                 >
-                  <Box
-                    sx={{
-                      display:
-                        "flex",
+                  <Box>
+                    <Typography
+                      sx={{
+                        fontWeight: 700,
+                      }}
+                    >
+                      {review.patient?.name || "Bệnh nhân"}
+                    </Typography>
 
-                      justifyContent:
-                        "space-between",
-
-                      alignItems: {
-                        xs: "flex-start",
-                        sm: "center",
-                      },
-
-                      flexDirection: {
-                        xs: "column",
-                        sm: "row",
-                      },
-
-                      gap: 1,
-
-                      mb: 2,
-                    }}
-                  >
-                    <Box>
-                      <Typography
-                        sx={{
-                          fontWeight:
-                            700,
-                        }}
-                      >
-                        {review
-                          .patient
-                          ?.name ||
-                          "Bệnh nhân"}
-                      </Typography>
-
-                      <Rating
-                        value={
-                          review.rating
-                        }
-                        readOnly
-                        size="small"
-                      />
-                    </Box>
-
-                    <Chip
-                      size="small"
-                      label={`${review.rating}/5`}
-                    />
+                    <Rating value={review.rating} readOnly size="small" />
                   </Box>
 
-                  <Typography>
-                    {review.comment ||
-                      "Không có nhận xét."}
-                  </Typography>
-                </Paper>
-              )
-            )}
+                  <Chip size="small" label={`${review.rating}/5`} />
+                </Box>
+
+                <Typography>
+                  {review.comment || "Không có nhận xét."}
+                </Typography>
+              </Paper>
+            ))}
           </Box>
         )}
       </Box>
@@ -1781,5 +1064,3 @@ function DoctorDetailPage() {
 }
 
 export default DoctorDetailPage;
-
-

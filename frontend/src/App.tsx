@@ -1,14 +1,10 @@
 import { Navigate, Route, Routes } from "react-router-dom";
-
 import { useAuth } from "./context/AuthContext";
-
 import LoginPage from "./pages/auth/LoginPage";
 import RegisterPage from "./pages/auth/RegisterPage";
-
 import PatientHomePage from "./pages/patient/PatientHomePage";
 import DoctorHomePage from "./pages/doctor/DoctorHomePage";
 import AdminHomePage from "./pages/admin/AdminHomePage";
-
 import ProtectedRoute from "./routes/ProtectedRoute";
 import MainLayout from "./layouts/MainLayout";
 import PatientProfilePage from "./pages/patient/PatientProfilePage";

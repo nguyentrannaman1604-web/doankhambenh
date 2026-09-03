@@ -1,5 +1,4 @@
 import api from "../api/axiosClient";
-
 export interface DoctorProfileSpecialty {
   id: number;
   doctorId: number;

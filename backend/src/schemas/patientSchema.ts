@@ -1,8 +1,6 @@
 import * as yup from "yup";
-
 const vietnamPhoneRegex =
   /^(?:03[2-9]|05[2689]|07[06789]|08[1-689]|09[0-46-9])\d{7}$/;
-
 const genderSchema = yup
   .mixed<"MALE" | "FEMALE" | "OTHER">()
   .oneOf(

@@ -1,8 +1,6 @@
 import { ai, GEMINI_MODEL } from "../lib/gemini.js";
-
 import prisma from "../lib/prisma.js";
 import { AppError } from "../types/AppError.js";
-
 interface SpecialtySuggestion {
   type: "SPECIALTY" | "GENERAL" | "URGENT";
   specialtyId: number | null;

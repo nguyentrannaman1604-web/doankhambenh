@@ -31,8 +31,6 @@ export async function getDoctorProfile(
   }
 }
 
-
-
 export async function updateDoctorProfile(
   req: Request,
   res: Response,

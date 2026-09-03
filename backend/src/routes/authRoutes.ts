@@ -22,7 +22,6 @@ import {
 
 const router = Router();
 
-
 router.post("/register", validateBody(registerPatientSchema), register);
 
 router.post("/login", validateBody(loginSchema), login);

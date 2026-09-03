@@ -1,5 +1,4 @@
 import * as yup from "yup";
-
 export const reviewSchema = yup.object({
   rating: yup
     .number()

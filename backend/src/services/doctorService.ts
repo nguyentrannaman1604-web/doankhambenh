@@ -122,7 +122,6 @@ export async function createDoctor(input: CreateDoctorInput) {
     throw new AppError("Bác sĩ phải có ít nhất một chuyên khoa", 400);
   }
 
-  // Kiểm tra gender
   if (
     input.gender !== undefined &&
     !["MALE", "FEMALE", "OTHER"].includes(input.gender)
@@ -154,7 +153,6 @@ export async function createDoctor(input: CreateDoctorInput) {
     throw new AppError("Email đã tồn tại", 409);
   }
 
-  // Kiểm tra chuyên khoa
   const uniqueSpecialtyIds = [...new Set(input.specialtyIds)];
 
   const specialties = await prisma.specialty.findMany({
@@ -169,7 +167,6 @@ export async function createDoctor(input: CreateDoctorInput) {
     throw new AppError("Có chuyên khoa không tồn tại", 400);
   }
 
-  // Hash password
   const hashedPassword = await bcrypt.hash(input.password, 10);
 
   const doctor = await prisma.$transaction(async (tx) => {
@@ -183,7 +180,6 @@ export async function createDoctor(input: CreateDoctorInput) {
 
         dateOfBirth,
 
-        // MỚI
         gender: input.gender,
         avatar: input.avatar,
 
@@ -298,7 +294,6 @@ export async function updateDoctor(id: number, input: UpdateDoctorInput) {
   }
 
   return prisma.$transaction(async (tx) => {
-    // Update bảng User
     await tx.user.update({
       where: {
         id: doctor.userId,
@@ -317,19 +312,16 @@ export async function updateDoctor(id: number, input: UpdateDoctorInput) {
           dateOfBirth,
         }),
 
-        // MỚI
         ...(input.gender !== undefined && {
           gender: input.gender,
         }),
 
-        // MỚI
         ...(input.avatar !== undefined && {
           avatar: input.avatar,
         }),
       },
     });
 
-    // Update bảng Doctor
     await tx.doctor.update({
       where: {
         id,

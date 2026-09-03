@@ -9,8 +9,6 @@ import {
   updateMyProfile,
 } from "../services/profileService.js";
 
-
-// GET /api/v1/profile
 export async function getProfile(
   req: Request,
   res: Response,
@@ -29,8 +27,6 @@ export async function getProfile(
     next(error);
   }
 }
-
-
 export async function updateProfile(
   req: Request,
   res: Response,

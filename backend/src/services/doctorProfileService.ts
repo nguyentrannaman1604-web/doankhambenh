@@ -1,6 +1,5 @@
 import prisma from "../lib/prisma.js";
 import { AppError } from "../types/AppError.js";
-
 interface UpdateDoctorProfileInput {
   name?: string;
   phone?: string | null;
@@ -10,11 +9,7 @@ interface UpdateDoctorProfileInput {
   bio?: string | null;
 }
 
-
-
-export async function getMyDoctorProfile(
-  userId: number
-) {
+export async function getMyDoctorProfile(userId: number) {
   const doctor = await prisma.doctor.findUnique({
     where: {
       userId,
@@ -45,19 +40,15 @@ export async function getMyDoctorProfile(
   });
 
   if (!doctor) {
-    throw new AppError(
-      "Không tìm thấy thông tin bác sĩ",
-      404
-    );
+    throw new AppError("Không tìm thấy thông tin bác sĩ", 404);
   }
 
   return doctor;
 }
 
-
 export async function updateMyDoctorProfile(
   userId: number,
-  input: UpdateDoctorProfileInput
+  input: UpdateDoctorProfileInput,
 ) {
   const doctor = await prisma.doctor.findUnique({
     where: {
@@ -66,36 +57,21 @@ export async function updateMyDoctorProfile(
   });
 
   if (!doctor) {
-    throw new AppError(
-      "Không tìm thấy thông tin bác sĩ",
-      404
-    );
+    throw new AppError("Không tìm thấy thông tin bác sĩ", 404);
   }
 
-  // Kiểm tra tên
-  if (
-    input.name !== undefined &&
-    input.name.trim().length < 2
-  ) {
-    throw new AppError(
-      "Tên phải có ít nhất 2 ký tự",
-      400
-    );
+  if (input.name !== undefined && input.name.trim().length < 2) {
+    throw new AppError("Tên phải có ít nhất 2 ký tự", 400);
   }
 
- 
   if (
     input.gender !== undefined &&
     input.gender !== null &&
     !["MALE", "FEMALE", "OTHER"].includes(input.gender)
   ) {
-    throw new AppError(
-      "Giới tính không hợp lệ",
-      400
-    );
+    throw new AppError("Giới tính không hợp lệ", 400);
   }
 
- 
   let dateOfBirth: Date | null | undefined;
 
   if (input.dateOfBirth === null) {
@@ -104,20 +80,13 @@ export async function updateMyDoctorProfile(
     dateOfBirth = new Date(input.dateOfBirth);
 
     if (Number.isNaN(dateOfBirth.getTime())) {
-      throw new AppError(
-        "Ngày sinh không hợp lệ",
-        400
-      );
+      throw new AppError("Ngày sinh không hợp lệ", 400);
     }
 
     if (dateOfBirth > new Date()) {
-      throw new AppError(
-        "Ngày sinh không được lớn hơn ngày hiện tại",
-        400
-      );
+      throw new AppError("Ngày sinh không được lớn hơn ngày hiện tại", 400);
     }
   }
-
 
   await prisma.$transaction([
     prisma.user.update({

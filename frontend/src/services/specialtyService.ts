@@ -1,5 +1,4 @@
 import api from "../api/axiosClient";
-
 import type {
   Specialty,
 } from "../types/doctor";

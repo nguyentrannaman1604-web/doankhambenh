@@ -24,12 +24,6 @@ router.use(
   authorize("DOCTOR")
 );
 
-/*
- * ==========================
- * BLOCKED SLOTS
- * ==========================
- */
-
 router.get(
   "/blocked-slots",
   getBlockedSlots
@@ -45,11 +39,6 @@ router.delete(
   removeBlockedSlot
 );
 
-/*
- * ==========================
- * DOCTOR SCHEDULES
- * ==========================
- */
 
 router.get(
   "/",

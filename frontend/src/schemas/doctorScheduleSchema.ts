@@ -1,5 +1,4 @@
 import * as yup from "yup";
-
 export const doctorScheduleSchema =
   yup.object({
     dayOfWeek: yup

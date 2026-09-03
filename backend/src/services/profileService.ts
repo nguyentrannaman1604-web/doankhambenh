@@ -9,8 +9,6 @@ interface UpdateProfileInput {
   avatar?: string | null;
 }
 
-
-
 export async function getMyProfile(userId: number) {
   const user = await prisma.user.findUnique({
     where: {
@@ -40,8 +38,6 @@ export async function getMyProfile(userId: number) {
 
   return user;
 }
-
-
 
 export async function updateMyProfile(
   userId: number,

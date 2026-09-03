@@ -15,10 +15,8 @@ function MainLayout() {
         bgcolor: "#f5f7fa",
       }}
     >
-      {/* FULL WIDTH */}
       <Navbar />
 
-      {/* CHỈ NỘI DUNG TRANG NẰM TRONG CONTAINER */}
       <Box
         component="main"
         sx={{

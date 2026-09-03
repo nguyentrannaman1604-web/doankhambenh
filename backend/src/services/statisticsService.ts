@@ -1,6 +1,5 @@
 import prisma from "../lib/prisma.js";
 import { AppError } from "../types/AppError.js";
-
 export async function getOverviewStatistics() {
   const [
     totalAppointments,

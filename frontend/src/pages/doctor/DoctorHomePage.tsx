@@ -28,10 +28,6 @@ function DoctorHomePage() {
         bgcolor: "#f7fbff",
       }}
     >
-      {/* =========================
-          HERO
-      ========================== */}
-
       <Box
         sx={{
           background:
@@ -122,11 +118,8 @@ function DoctorHomePage() {
                   mb: 4,
                 }}
               >
-                Theo dõi lịch làm việc,
-                quản lý thời gian nghỉ và
-                xem danh sách bệnh nhân
-                trong ngày tại PHÒNG KHÁM
-                PANDA.
+                Theo dõi lịch làm việc, quản lý thời gian nghỉ và xem danh sách
+                bệnh nhân trong ngày tại PHÒNG KHÁM PANDA.
               </Typography>
 
               <Stack
@@ -139,14 +132,8 @@ function DoctorHomePage() {
                 <Button
                   variant="contained"
                   size="large"
-                  startIcon={
-                    <CalendarMonth />
-                  }
-                  onClick={() =>
-                    navigate(
-                      "/doctor/schedules"
-                    )
-                  }
+                  startIcon={<CalendarMonth />}
+                  onClick={() => navigate("/doctor/schedules")}
                   sx={{
                     px: 4,
                     py: 1.5,
@@ -165,11 +152,7 @@ function DoctorHomePage() {
                   variant="outlined"
                   size="large"
                   startIcon={<Groups />}
-                  onClick={() =>
-                    navigate(
-                      "/doctor/patients-today"
-                    )
-                  }
+                  onClick={() => navigate("/doctor/patients-today")}
                   sx={{
                     px: 4,
                     py: 1.5,
@@ -188,8 +171,6 @@ function DoctorHomePage() {
               </Stack>
             </Box>
 
-            {/* RIGHT CARD */}
-
             <Paper
               elevation={0}
               sx={{
@@ -200,14 +181,11 @@ function DoctorHomePage() {
 
                 borderRadius: 5,
 
-                bgcolor:
-                  "rgba(255,255,255,0.92)",
+                bgcolor: "rgba(255,255,255,0.92)",
 
-                border:
-                  "1px solid rgba(22,135,201,0.12)",
+                border: "1px solid rgba(22,135,201,0.12)",
 
-                boxShadow:
-                  "0 20px 60px rgba(23,92,135,0.12)",
+                boxShadow: "0 20px 60px rgba(23,92,135,0.12)",
               }}
             >
               <Box
@@ -223,8 +201,7 @@ function DoctorHomePage() {
 
                   alignItems: "center",
 
-                  justifyContent:
-                    "center",
+                  justifyContent: "center",
 
                   mx: "auto",
 
@@ -259,24 +236,18 @@ function DoctorHomePage() {
                 sx={{
                   textAlign: "center",
 
-                  color:
-                    "text.secondary",
+                  color: "text.secondary",
 
                   lineHeight: 1.8,
                 }}
               >
-                Hỗ trợ bác sĩ quản lý
-                lịch khám và chăm sóc
-                bệnh nhân hiệu quả hơn.
+                Hỗ trợ bác sĩ quản lý lịch khám và chăm sóc bệnh nhân hiệu quả
+                hơn.
               </Typography>
             </Paper>
           </Box>
         </Container>
       </Box>
-
-      {/* =========================
-          QUICK ACTIONS
-      ========================== */}
 
       <Container
         maxWidth="lg"
@@ -309,12 +280,10 @@ function DoctorHomePage() {
             sx={{
               mt: 1,
 
-              color:
-                "text.secondary",
+              color: "text.secondary",
             }}
           >
-            Truy cập nhanh các chức năng
-            thường sử dụng.
+            Truy cập nhanh các chức năng thường sử dụng.
           </Typography>
         </Box>
 
@@ -341,11 +310,7 @@ function DoctorHomePage() {
             title="Lịch làm việc"
             description="Thiết lập lịch theo tuần, xem theo tháng, chỉnh sửa và quản lý giờ khám."
             buttonLabel="Quản lý lịch"
-            onClick={() =>
-              navigate(
-                "/doctor/schedules"
-              )
-            }
+            onClick={() => navigate("/doctor/schedules")}
           />
 
           <DoctorFeatureCard
@@ -359,11 +324,7 @@ function DoctorHomePage() {
             title="Bệnh nhân hôm nay"
             description="Xem danh sách bệnh nhân có lịch khám trong ngày và thông tin liên hệ."
             buttonLabel="Xem bệnh nhân"
-            onClick={() =>
-              navigate(
-                "/doctor/patients-today"
-              )
-            }
+            onClick={() => navigate("/doctor/patients-today")}
           />
 
           <DoctorFeatureCard
@@ -377,18 +338,10 @@ function DoctorHomePage() {
             title="Nghỉ đột xuất"
             description="Chặn một khoảng thời gian khi bác sĩ có việc bận hoặc không thể tiếp nhận bệnh nhân."
             buttonLabel="Quản lý thời gian"
-            onClick={() =>
-              navigate(
-                "/doctor/schedules"
-              )
-            }
+            onClick={() => navigate("/doctor/schedules")}
           />
         </Box>
       </Container>
-
-      {/* =========================
-          WORKFLOW
-      ========================== */}
 
       <Box
         sx={{
@@ -423,13 +376,10 @@ function DoctorHomePage() {
               sx={{
                 mt: 1,
 
-                color:
-                  "text.secondary",
+                color: "text.secondary",
               }}
             >
-              Một quy trình đơn giản giúp
-              bác sĩ quản lý lịch khám
-              hiệu quả.
+              Một quy trình đơn giản giúp bác sĩ quản lý lịch khám hiệu quả.
             </Typography>
           </Box>
 
@@ -466,10 +416,6 @@ function DoctorHomePage() {
         </Container>
       </Box>
 
-      {/* =========================
-          CTA
-      ========================== */}
-
       <Container
         maxWidth="lg"
         sx={{
@@ -491,8 +437,7 @@ function DoctorHomePage() {
 
             color: "white",
 
-            background:
-              "linear-gradient(135deg, #0c78b7 0%, #27a5c7 100%)",
+            background: "linear-gradient(135deg, #0c78b7 0%, #27a5c7 100%)",
 
             display: "flex",
 
@@ -501,8 +446,7 @@ function DoctorHomePage() {
               md: "row",
             },
 
-            justifyContent:
-              "space-between",
+            justifyContent: "space-between",
 
             alignItems: {
               xs: "flex-start",
@@ -537,20 +481,14 @@ function DoctorHomePage() {
                 opacity: 0.9,
               }}
             >
-              Kiểm tra ngay danh sách
-              bệnh nhân có lịch khám hôm
-              nay.
+              Kiểm tra ngay danh sách bệnh nhân có lịch khám hôm nay.
             </Typography>
           </Box>
 
           <Button
             variant="contained"
             size="large"
-            onClick={() =>
-              navigate(
-                "/doctor/patients-today"
-              )
-            }
+            onClick={() => navigate("/doctor/patients-today")}
             sx={{
               bgcolor: "white",
 
@@ -577,10 +515,6 @@ function DoctorHomePage() {
     </Box>
   );
 }
-
-/* =========================
-   FEATURE CARD
-========================== */
 
 interface DoctorFeatureCardProps {
   icon: React.ReactNode;
@@ -609,18 +543,14 @@ function DoctorFeatureCard({
 
         bgcolor: "white",
 
-        border:
-          "1px solid #e8eef3",
+        border: "1px solid #e8eef3",
 
-        transition:
-          "0.2s ease",
+        transition: "0.2s ease",
 
         "&:hover": {
-          transform:
-            "translateY(-5px)",
+          transform: "translateY(-5px)",
 
-          boxShadow:
-            "0 14px 35px rgba(25,89,130,0.10)",
+          boxShadow: "0 14px 35px rgba(25,89,130,0.10)",
         },
       }}
     >
@@ -676,21 +606,13 @@ function DoctorFeatureCard({
   );
 }
 
-/* =========================
-   STEP
-========================== */
-
 interface DoctorStepProps {
   number: string;
   title: string;
   description: string;
 }
 
-function DoctorStep({
-  number,
-  title,
-  description,
-}: DoctorStepProps) {
+function DoctorStep({ number, title, description }: DoctorStepProps) {
   return (
     <Paper
       variant="outlined"
@@ -708,8 +630,7 @@ function DoctorStep({
 
           fontWeight: 900,
 
-          color:
-            "rgba(22,135,201,0.15)",
+          color: "rgba(22,135,201,0.15)",
 
           lineHeight: 1,
 

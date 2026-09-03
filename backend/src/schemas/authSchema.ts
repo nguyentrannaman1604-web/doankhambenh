@@ -1,7 +1,4 @@
 import * as yup from "yup";
-
-
-
 export const loginSchema = yup.object({
   email: yup
     .string()
@@ -15,18 +12,12 @@ export const loginSchema = yup.object({
     .required("Mật khẩu là bắt buộc"),
 });
 
-
-
-
 export const refreshTokenSchema = yup.object({
   refreshToken: yup
     .string()
     .trim()
     .required("Refresh token là bắt buộc"),
 });
-
-
-
 
 export const logoutSchema = yup.object({
   refreshToken: yup

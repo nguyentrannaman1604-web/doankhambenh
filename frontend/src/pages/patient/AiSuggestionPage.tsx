@@ -1,6 +1,4 @@
-import {
-  useState,
-} from "react";
+import { useState } from "react";
 
 import {
   Alert,
@@ -12,90 +10,52 @@ import {
   Typography,
 } from "@mui/material";
 
-import {
-  Controller,
-  useForm,
-} from "react-hook-form";
+import { Controller, useForm } from "react-hook-form";
 
-import {
-  yupResolver,
-} from "@hookform/resolvers/yup";
+import { yupResolver } from "@hookform/resolvers/yup";
 
-import {
-  useNavigate,
-} from "react-router-dom";
+import { useNavigate } from "react-router-dom";
 
 import {
   aiSuggestionSchema,
   type AiSuggestionFormData,
 } from "../../schemas/aiSchema";
 
-import {
-  suggestSpecialty,
-} from "../../services/aiService";
+import { suggestSpecialty } from "../../services/aiService";
 
-import type {
-  AiSuggestion,
-} from "../../types/ai";
+import type { AiSuggestion } from "../../types/ai";
 
 function AiSuggestionPage() {
   const navigate = useNavigate();
 
-  const [
-    result,
-    setResult,
-  ] = useState<AiSuggestion | null>(
-    null
-  );
+  const [result, setResult] = useState<AiSuggestion | null>(null);
 
-  const [
-    error,
-    setError,
-  ] = useState("");
+  const [error, setError] = useState("");
 
   const {
     control,
     handleSubmit,
-    formState: {
-      errors,
-      isSubmitting,
-    },
+    formState: { errors, isSubmitting },
   } = useForm<AiSuggestionFormData>({
-    resolver: yupResolver(
-      aiSuggestionSchema
-    ),
+    resolver: yupResolver(aiSuggestionSchema),
 
     defaultValues: {
       symptoms: "",
     },
   });
 
-  const onSubmit = async (
-    data: AiSuggestionFormData
-  ) => {
+  const onSubmit = async (data: AiSuggestionFormData) => {
     try {
       setError("");
       setResult(null);
 
-      const response =
-        await suggestSpecialty(
-          data
-        );
+      const response = await suggestSpecialty(data);
 
-      setResult(
-        response.data
-      );
+      setResult(response.data);
     } catch (error: any) {
-      console.error(
-        "AI suggestion error:",
-        error
-      );
+      console.error("AI suggestion error:", error);
 
-      setError(
-        error.response?.data
-          ?.message ||
-          "Không thể nhận gợi ý từ AI"
-      );
+      setError(error.response?.data?.message || "Không thể nhận gợi ý từ AI");
     }
   };
 
@@ -104,9 +64,7 @@ function AiSuggestionPage() {
       return;
     }
 
-    navigate(
-      `/patient/doctors?specialtyId=${result.specialtyId}`
-    );
+    navigate(`/patient/doctors?specialtyId=${result.specialtyId}`);
   };
 
   return (
@@ -116,8 +74,6 @@ function AiSuggestionPage() {
         mx: "auto",
       }}
     >
-      {/* TIÊU ĐỀ */}
-
       <Box
         sx={{
           mb: 4,
@@ -136,17 +92,12 @@ function AiSuggestionPage() {
 
         <Typography
           sx={{
-            color:
-              "text.secondary",
+            color: "text.secondary",
           }}
         >
-          Mô tả triệu chứng của
-          bạn để nhận gợi ý chuyên
-          khoa phù hợp.
+          Mô tả triệu chứng của bạn để nhận gợi ý chuyên khoa phù hợp.
         </Typography>
       </Box>
-
-      {/* FORM */}
 
       <Paper
         elevation={2}
@@ -159,13 +110,7 @@ function AiSuggestionPage() {
           mb: 3,
         }}
       >
-        <form
-          onSubmit={
-            handleSubmit(
-              onSubmit
-            )
-          }
-        >
+        <form onSubmit={handleSubmit(onSubmit)}>
           <Controller
             name="symptoms"
             control={control}
@@ -178,18 +123,12 @@ function AiSuggestionPage() {
                 multiline
                 minRows={5}
                 required
-                error={
-                  !!errors.symptoms
-                }
-                helperText={
-                  errors.symptoms
-                    ?.message
-                }
+                error={!!errors.symptoms}
+                helperText={errors.symptoms?.message}
                 sx={{
-                  "& .MuiFormLabel-asterisk":
-                    {
-                      color: "red",
-                    },
+                  "& .MuiFormLabel-asterisk": {
+                    color: "red",
+                  },
                 }}
               />
             )}
@@ -199,9 +138,7 @@ function AiSuggestionPage() {
             type="submit"
             variant="contained"
             size="large"
-            disabled={
-              isSubmitting
-            }
+            disabled={isSubmitting}
             sx={{
               mt: 3,
               textTransform: "none",
@@ -217,7 +154,6 @@ function AiSuggestionPage() {
                     color: "inherit",
                   }}
                 />
-
                 Đang phân tích...
               </>
             ) : (
@@ -226,8 +162,6 @@ function AiSuggestionPage() {
           </Button>
         </form>
       </Paper>
-
-      {/* ERROR */}
 
       {error && (
         <Alert
@@ -239,8 +173,6 @@ function AiSuggestionPage() {
           {error}
         </Alert>
       )}
-
-      {/* KẾT QUẢ AI */}
 
       {result && (
         <Paper
@@ -255,8 +187,7 @@ function AiSuggestionPage() {
         >
           <Typography
             sx={{
-              color:
-                "text.secondary",
+              color: "text.secondary",
               mb: 1,
             }}
           >
@@ -266,8 +197,7 @@ function AiSuggestionPage() {
           <Typography
             variant="h4"
             sx={{
-              color:
-                "primary.main",
+              color: "primary.main",
               fontWeight: 700,
               mb: 3,
             }}
@@ -304,15 +234,12 @@ function AiSuggestionPage() {
 
           <Button
             variant="contained"
-            onClick={
-              handleViewDoctors
-            }
+            onClick={handleViewDoctors}
             sx={{
               textTransform: "none",
             }}
           >
-            Xem bác sĩ{" "}
-            {result.specialty}
+            Xem bác sĩ {result.specialty}
           </Button>
         </Paper>
       )}

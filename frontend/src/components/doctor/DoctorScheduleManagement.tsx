@@ -1,5 +1,4 @@
 import { useEffect, useState } from "react";
-
 import {
   Alert,
   Box,
@@ -110,9 +109,6 @@ function DoctorScheduleManagement() {
     loadSchedules();
   }, []);
 
-  /*
-   * MỞ FORM TẠO
-   */
   const handleOpenCreate = () => {
     setEditingSchedule(null);
 
@@ -126,9 +122,6 @@ function DoctorScheduleManagement() {
     setDialogOpen(true);
   };
 
-  /*
-   * MỞ FORM SỬA
-   */
   const handleOpenEdit = (schedule: DoctorSchedule) => {
     setEditingSchedule(schedule);
 
@@ -145,9 +138,6 @@ function DoctorScheduleManagement() {
     setDialogOpen(true);
   };
 
-  /*
-   * SUBMIT
-   */
   const onSubmit = async (data: DoctorScheduleFormData) => {
     try {
       setMessage("");
@@ -184,9 +174,6 @@ function DoctorScheduleManagement() {
     }
   };
 
-  /*
-   * BẬT / TẮT LỊCH
-   */
   const handleToggle = async (schedule: DoctorSchedule) => {
     try {
       await toggleDoctorSchedule(schedule.id);
@@ -215,9 +202,6 @@ function DoctorScheduleManagement() {
     }
   };
 
-  /*
-   * XÓA LỊCH LÀM VIỆC
-   */
   const handleDeleteSchedule = async () => {
     if (!deletingSchedule) {
       return;
@@ -493,8 +477,6 @@ function DoctorScheduleManagement() {
         </Stack>
       )}
 
-      {/* DIALOG */}
-
       <Dialog
         open={dialogOpen}
         onClose={() => setDialogOpen(false)}
@@ -618,8 +600,6 @@ function DoctorScheduleManagement() {
           </DialogActions>
         </Box>
       </Dialog>
-
-      {/* DIALOG XÁC NHẬN XÓA */}
 
       <Dialog
         open={deletingSchedule !== null}

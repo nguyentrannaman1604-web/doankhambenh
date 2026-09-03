@@ -1,10 +1,4 @@
-
-
-import type {
-  Request,
-  Response,
-  NextFunction,
-} from "express";
+import type { Request, Response, NextFunction } from "express";
 
 import {
   getMySchedules,
@@ -17,21 +11,13 @@ import {
   deleteBlockedSlot,
 } from "../services/scheduleService.js";
 
-/*
- * ==========================
- * LẤY LỊCH LÀM VIỆC
- * ==========================
- */
-
 export async function getSchedules(
   req: Request,
   res: Response,
-  next: NextFunction
+  next: NextFunction,
 ) {
   try {
-    const data = await getMySchedules(
-      req.user!.userId
-    );
+    const data = await getMySchedules(req.user!.userId);
 
     return res.status(200).json({
       success: true,
@@ -41,149 +27,91 @@ export async function getSchedules(
     next(error);
   }
 }
-
-/*
- * ==========================
- * TẠO LỊCH LÀM VIỆC
- * ==========================
- */
 
 export async function createSchedule(
   req: Request,
   res: Response,
-  next: NextFunction
+  next: NextFunction,
 ) {
   try {
-    const data = await createMySchedule(
-      req.user!.userId,
-      req.body
-    );
+    const data = await createMySchedule(req.user!.userId, req.body);
 
     return res.status(201).json({
       success: true,
-      message:
-        "Tạo lịch làm việc thành công",
+      message: "Tạo lịch làm việc thành công",
       data,
     });
   } catch (error) {
     next(error);
   }
 }
-
-/*
- * ==========================
- * CẬP NHẬT LỊCH
- * ==========================
- */
 
 export async function updateSchedule(
   req: Request,
   res: Response,
-  next: NextFunction
+  next: NextFunction,
 ) {
   try {
-    const scheduleId = Number(
-      req.params.id
-    );
+    const scheduleId = Number(req.params.id);
 
-    const data =
-      await updateMySchedule(
-        req.user!.userId,
-        scheduleId,
-        req.body
-      );
+    const data = await updateMySchedule(req.user!.userId, scheduleId, req.body);
 
     return res.status(200).json({
       success: true,
-      message:
-        "Cập nhật lịch làm việc thành công",
+      message: "Cập nhật lịch làm việc thành công",
       data,
     });
   } catch (error) {
     next(error);
   }
 }
-
-/*
- * ==========================
- * BẬT / TẮT LỊCH
- * ==========================
- */
 
 export async function toggleSchedule(
   req: Request,
   res: Response,
-  next: NextFunction
+  next: NextFunction,
 ) {
   try {
-    const scheduleId = Number(
-      req.params.id
-    );
+    const scheduleId = Number(req.params.id);
 
-    const data =
-      await toggleMySchedule(
-        req.user!.userId,
-        scheduleId
-      );
+    const data = await toggleMySchedule(req.user!.userId, scheduleId);
 
     return res.status(200).json({
       success: true,
-      message:
-        "Thay đổi trạng thái lịch thành công",
+      message: "Thay đổi trạng thái lịch thành công",
       data,
     });
   } catch (error) {
     next(error);
   }
 }
-
-/*
- * ==========================
- * XÓA LỊCH LÀM VIỆC
- * ==========================
- */
 
 export async function removeSchedule(
   req: Request,
   res: Response,
-  next: NextFunction
+  next: NextFunction,
 ) {
   try {
-    const scheduleId = Number(
-      req.params.id
-    );
+    const scheduleId = Number(req.params.id);
 
-    await deleteMySchedule(
-      req.user!.userId,
-      scheduleId
-    );
+    await deleteMySchedule(req.user!.userId, scheduleId);
 
     return res.status(200).json({
       success: true,
-      message:
-        "Xóa lịch làm việc thành công",
+      message: "Xóa lịch làm việc thành công",
     });
   } catch (error) {
     next(error);
   }
 }
-
-/*
- * ==========================
- * LẤY THỜI GIAN ĐÃ CHẶN
- * ==========================
- */
 
 export async function getBlockedSlots(
   req: Request,
   res: Response,
-  next: NextFunction
+  next: NextFunction,
 ) {
   try {
-    const data =
-      await getMyBlockedSlots(
-        req.user!.userId
-      );
+    const data = await getMyBlockedSlots(req.user!.userId);
 
     return res.status(200).json({
       success: true,
@@ -193,29 +121,18 @@ export async function getBlockedSlots(
     next(error);
   }
 }
-
-/*
- * ==========================
- * CHẶN THỜI GIAN
- * ==========================
- */
 
 export async function blockSlot(
   req: Request,
   res: Response,
-  next: NextFunction
+  next: NextFunction,
 ) {
   try {
-    const data =
-      await createBlockedSlot(
-        req.user!.userId,
-        req.body
-      );
+    const data = await createBlockedSlot(req.user!.userId, req.body);
 
     return res.status(201).json({
       success: true,
-      message:
-        "Chặn khung giờ thành công",
+      message: "Chặn khung giờ thành công",
       data,
     });
   } catch (error) {
@@ -223,31 +140,19 @@ export async function blockSlot(
   }
 }
 
-/*
- * ==========================
- * XÓA THỜI GIAN ĐÃ CHẶN
- * ==========================
- */
-
 export async function removeBlockedSlot(
   req: Request,
   res: Response,
-  next: NextFunction
+  next: NextFunction,
 ) {
   try {
-    const id = Number(
-      req.params.id
-    );
+    const id = Number(req.params.id);
 
-    await deleteBlockedSlot(
-      req.user!.userId,
-      id
-    );
+    await deleteBlockedSlot(req.user!.userId, id);
 
     return res.status(200).json({
       success: true,
-      message:
-        "Xóa khung giờ đã chặn thành công",
+      message: "Xóa khung giờ đã chặn thành công",
     });
   } catch (error) {
     next(error);

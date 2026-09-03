@@ -1,5 +1,4 @@
 import api from "../api/axiosClient";
-
 import type {
   Doctor,
   DoctorsResponse,
@@ -66,8 +65,6 @@ export async function deleteDoctor(
 
   return response.data;
 }
-
-
 export async function updateDoctor(
   doctorId: number,
   data: UpdateDoctorInput

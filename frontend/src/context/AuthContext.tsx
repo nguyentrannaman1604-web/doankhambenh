@@ -35,9 +35,6 @@ export function AuthProvider({ children }: AuthProviderProps) {
     }
   });
 
-  /*
-   * ĐĂNG NHẬP
-   */
   const login = (userData: User, accessToken: string, refreshToken: string) => {
     localStorage.setItem("accessToken", accessToken);
 
@@ -48,17 +45,6 @@ export function AuthProvider({ children }: AuthProviderProps) {
     setUser(userData);
   };
 
-  /*
-   * CẬP NHẬT USER TRONG FRONTEND
-   *
-   * Dùng sau khi bệnh nhân
-   * sửa hồ sơ thành công.
-   *
-   * Ví dụ:
-   * updateUser({
-   *   name: "Nguyễn Văn An"
-   * });
-   */
   const updateUser = (userData: Partial<User>) => {
     setUser((currentUser) => {
       if (!currentUser) {
@@ -70,20 +56,12 @@ export function AuthProvider({ children }: AuthProviderProps) {
         ...userData,
       };
 
-      /*
-       * Cập nhật localStorage
-       * để reload trang vẫn giữ
-       * thông tin mới.
-       */
       localStorage.setItem("user", JSON.stringify(updatedUser));
 
       return updatedUser;
     });
   };
 
-  /*
-   * ĐĂNG XUẤT
-   */
   const logout = () => {
     localStorage.removeItem("accessToken");
 

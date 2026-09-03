@@ -1,10 +1,8 @@
 import jwt from "jsonwebtoken";
-
 export interface TokenPayload {
   userId: number;
   role: string;
 }
-
 export function generateAccessToken(payload: TokenPayload) {
   return jwt.sign(
     payload,

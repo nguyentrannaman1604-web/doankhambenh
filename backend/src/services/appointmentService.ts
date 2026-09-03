@@ -8,7 +8,6 @@ interface CreateAppointmentInput {
   reason?: string;
 }
 
-
 interface AppointmentFilter {
   doctorId?: number;
   date?: string;
@@ -46,7 +45,6 @@ export async function createAppointment(
     );
   }
 
- 
   const doctor = await prisma.doctor.findUnique({
     where: {
       id: input.doctorId,
@@ -59,7 +57,6 @@ export async function createAppointment(
       404
     );
   }
-
  
   const vnDate = new Date(
     startAt.toLocaleString("en-US", {
@@ -68,12 +65,9 @@ export async function createAppointment(
   );
 
   const dayOfWeek = vnDate.getDay();
-
   const hour = String(vnDate.getHours()).padStart(2, "0");
   const minute = String(vnDate.getMinutes()).padStart(2, "0");
-
   const startTime = `${hour}:${minute}`;
-
   const schedules = await prisma.workingSchedule.findMany({
     where: {
       doctorId: doctor.id,
@@ -95,8 +89,7 @@ export async function createAppointment(
     );
   }
 
- 
-  const durationMinutes =
+   const durationMinutes =
     (endAt.getTime() - startAt.getTime()) / 60000;
 
   if (durationMinutes !== matchingSchedule.slotDuration) {
@@ -105,13 +98,11 @@ export async function createAppointment(
       400
     );
   }
-
   const endVnDate = new Date(
     endAt.toLocaleString("en-US", {
       timeZone: "Asia/Ho_Chi_Minh",
     })
   );
-
   const endTime =
     `${String(endVnDate.getHours()).padStart(2, "0")}:` +
     `${String(endVnDate.getMinutes()).padStart(2, "0")}`;
@@ -122,7 +113,6 @@ export async function createAppointment(
       400
     );
   }
-
   const blockedSlot = await prisma.blockedSlot.findFirst({
     where: {
       doctorId: doctor.id,
@@ -141,7 +131,6 @@ export async function createAppointment(
       409
     );
   }
-
 
   const existingAppointment =
     await prisma.appointment.findFirst({
@@ -169,7 +158,6 @@ export async function createAppointment(
     );
   }
 
-  // 8. Tạo lịch hẹn
   return prisma.appointment.create({
     data: {
       patientId,
@@ -296,7 +284,6 @@ export async function cancelMyAppointment(
     },
   });
 }
-
 
 export async function getDoctorAppointmentsByDate(
   userId: number,

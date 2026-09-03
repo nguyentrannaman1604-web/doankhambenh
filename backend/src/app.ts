@@ -1,6 +1,5 @@
 import express from "express";
 import cors from "cors";
-
 import authRoutes from "./routes/authRoutes.js";
 import { errorHandler } from "./middlewares/errorHandler.js";
 import specialtyRoutes from "./routes/specialtyRoutes.js";
@@ -12,7 +11,6 @@ import statisticsRoutes from "./routes/statisticsRoutes.js";
 import profileRoutes from "./routes/profileRoutes.js";
 import doctorProfileRoutes from "./routes/doctorProfileRoutes.js";
 import aiRoutes from "./routes/aiRoutes.js";
-
 const app = express();
 
 app.use(cors());
@@ -42,7 +40,6 @@ app.use("/api/v1/admin/statistics", statisticsRoutes);
 app.use("/api/v1/profile", profileRoutes);
 app.use("/api/v1/doctor/profile", doctorProfileRoutes);
 app.use("/api/v1/ai", aiRoutes);
-
 
 
 app.use(errorHandler);

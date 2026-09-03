@@ -1,5 +1,4 @@
 import { useEffect, useState } from "react";
-
 import {
   Alert,
   Avatar,
@@ -111,8 +110,6 @@ function DoctorCard({ doctor }: DoctorCardProps) {
           </Typography>
         </Box>
       </Box>
-
-      {/* KINH NGHIỆM */}
 
       <Typography
         sx={{

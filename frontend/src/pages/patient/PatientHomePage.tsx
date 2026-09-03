@@ -20,9 +20,6 @@ function PatientHomePage() {
         minHeight: "100vh",
       }}
     >
-      {/* =========================
-          HERO
-      ========================== */}
       <Box
         sx={{
           background:
@@ -51,7 +48,6 @@ function PatientHomePage() {
               },
             }}
           >
-            {/* LEFT */}
             <Box>
               <Chip
                 label="PHÒNG KHÁM PANDA"
@@ -112,9 +108,8 @@ function PatientHomePage() {
                   mb: 4,
                 }}
               >
-                Tìm bác sĩ phù hợp, xem lịch khám
-                còn trống và đặt lịch trực tuyến
-                nhanh chóng tại PHÒNG KHÁM PANDA.
+                Tìm bác sĩ phù hợp, xem lịch khám còn trống và đặt lịch trực
+                tuyến nhanh chóng tại PHÒNG KHÁM PANDA.
               </Typography>
 
               <Stack
@@ -127,11 +122,7 @@ function PatientHomePage() {
                 <Button
                   variant="contained"
                   size="large"
-                  onClick={() =>
-                    navigate(
-                      "/patient/doctors"
-                    )
-                  }
+                  onClick={() => navigate("/patient/doctors")}
                   sx={{
                     px: 4,
                     py: 1.5,
@@ -151,11 +142,7 @@ function PatientHomePage() {
                 <Button
                   variant="outlined"
                   size="large"
-                  onClick={() =>
-                    navigate(
-                      "/patient/ai-suggestion"
-                    )
-                  }
+                  onClick={() => navigate("/patient/ai-suggestion")}
                   sx={{
                     px: 4,
                     py: 1.5,
@@ -176,7 +163,6 @@ function PatientHomePage() {
               </Stack>
             </Box>
 
-            {/* RIGHT */}
             <Paper
               elevation={0}
               sx={{
@@ -186,28 +172,20 @@ function PatientHomePage() {
                 },
 
                 borderRadius: 5,
-
-                bgcolor:
-                  "rgba(255,255,255,0.9)",
-
-                border:
-                  "1px solid rgba(22,135,201,0.12)",
-
-                boxShadow:
-                  "0 20px 60px rgba(23, 92, 135, 0.12)",
+                bgcolor: "rgba(255,255,255,0.9)",
+                border: "1px solid rgba(22,135,201,0.12)",
+                boxShadow: "0 20px 60px rgba(23, 92, 135, 0.12)",
               }}
             >
               <Box
                 sx={{
                   textAlign: "center",
-
                   fontSize: {
                     xs: 90,
                     md: 130,
                   },
 
                   lineHeight: 1,
-
                   mb: 2,
                 }}
               >
@@ -218,11 +196,8 @@ function PatientHomePage() {
                 variant="h5"
                 sx={{
                   fontWeight: 800,
-
                   textAlign: "center",
-
                   color: "#14324a",
-
                   mb: 1,
                 }}
               >
@@ -234,26 +209,18 @@ function PatientHomePage() {
               <Typography
                 sx={{
                   textAlign: "center",
-
-                  color:
-                    "text.secondary",
-
+                  color: "text.secondary",
                   lineHeight: 1.7,
                 }}
               >
-                Đặt lịch đơn giản,
-                theo dõi thuận tiện và
-                kết nối với bác sĩ nhanh
-                chóng.
+                Đặt lịch đơn giản, theo dõi thuận tiện và kết nối với bác sĩ
+                nhanh chóng.
               </Typography>
             </Paper>
           </Box>
         </Container>
       </Box>
 
-      {/* =========================
-          WHY PANDA
-      ========================== */}
       <Container
         maxWidth="lg"
         sx={{
@@ -285,9 +252,7 @@ function PatientHomePage() {
               mt: 1,
             }}
           >
-            Trải nghiệm đặt lịch khám
-            đơn giản, nhanh chóng và
-            thuận tiện.
+            Trải nghiệm đặt lịch khám đơn giản, nhanh chóng và thuận tiện.
           </Typography>
         </Box>
 
@@ -324,9 +289,6 @@ function PatientHomePage() {
         </Box>
       </Container>
 
-      {/* =========================
-          3 STEPS
-      ========================== */}
       <Box
         sx={{
           bgcolor: "white",
@@ -408,11 +370,7 @@ function PatientHomePage() {
             <Button
               variant="contained"
               size="large"
-              onClick={() =>
-                navigate(
-                  "/patient/doctors"
-                )
-              }
+              onClick={() => navigate("/patient/doctors")}
               sx={{
                 px: 5,
                 py: 1.5,
@@ -429,10 +387,6 @@ function PatientHomePage() {
           </Box>
         </Container>
       </Box>
-
-      {/* =========================
-          AI SECTION
-      ========================== */}
       <Container
         maxWidth="lg"
         sx={{
@@ -453,8 +407,7 @@ function PatientHomePage() {
 
             borderRadius: 4,
 
-            background:
-              "linear-gradient(135deg, #0c78b7 0%, #27a5c7 100%)",
+            background: "linear-gradient(135deg, #0c78b7 0%, #27a5c7 100%)",
 
             color: "white",
 
@@ -493,8 +446,7 @@ function PatientHomePage() {
                   mb: 1.5,
                 }}
               >
-                Không biết nên khám
-                chuyên khoa nào?
+                Không biết nên khám chuyên khoa nào?
               </Typography>
 
               <Typography
@@ -506,11 +458,8 @@ function PatientHomePage() {
                   maxWidth: 700,
                 }}
               >
-                Hãy mô tả triệu chứng
-                của bạn. AI của PANDA
-                sẽ hỗ trợ gợi ý chuyên
-                khoa phù hợp để bạn tham
-                khảo trước khi đặt lịch.
+                Hãy mô tả triệu chứng của bạn. AI của PANDA sẽ hỗ trợ gợi ý
+                chuyên khoa phù hợp để bạn tham khảo trước khi đặt lịch.
               </Typography>
 
               <Typography
@@ -521,20 +470,14 @@ function PatientHomePage() {
                   mt: 2,
                 }}
               >
-                AI chỉ hỗ trợ tham khảo
-                và không thay thế chẩn
-                đoán của bác sĩ.
+                AI chỉ hỗ trợ tham khảo và không thay thế chẩn đoán của bác sĩ.
               </Typography>
             </Box>
 
             <Button
               variant="contained"
               size="large"
-              onClick={() =>
-                navigate(
-                  "/patient/ai-suggestion"
-                )
-              }
+              onClick={() => navigate("/patient/ai-suggestion")}
               sx={{
                 bgcolor: "white",
 
@@ -560,9 +503,6 @@ function PatientHomePage() {
         </Paper>
       </Container>
 
-      {/* =========================
-          APPOINTMENTS CTA
-      ========================== */}
       <Container
         maxWidth="lg"
         sx={{
@@ -607,18 +547,12 @@ function PatientHomePage() {
               mb: 3,
             }}
           >
-            Theo dõi lịch sắp tới, lịch
-            đã hoàn thành hoặc hủy lịch
-            khi cần.
+            Theo dõi lịch sắp tới, lịch đã hoàn thành hoặc hủy lịch khi cần.
           </Typography>
 
           <Button
             variant="outlined"
-            onClick={() =>
-              navigate(
-                "/patient/appointments"
-              )
-            }
+            onClick={() => navigate("/patient/appointments")}
             sx={{
               textTransform: "none",
 
@@ -637,47 +571,26 @@ function PatientHomePage() {
   );
 }
 
-/*
- * ==========================
- * FEATURE CARD
- * ==========================
- */
-
 interface FeatureCardProps {
   icon: string;
   title: string;
   description: string;
 }
 
-function FeatureCard({
-  icon,
-  title,
-  description,
-}: FeatureCardProps) {
+function FeatureCard({ icon, title, description }: FeatureCardProps) {
   return (
     <Paper
       elevation={0}
       sx={{
         height: "100%",
-
         p: 4,
-
         borderRadius: 3,
-
         bgcolor: "white",
-
-        border:
-          "1px solid #e8eef3",
-
-        transition:
-          "transform 0.2s ease, box-shadow 0.2s ease",
-
+        border: "1px solid #e8eef3",
+        transition: "transform 0.2s ease, box-shadow 0.2s ease",
         "&:hover": {
-          transform:
-            "translateY(-5px)",
-
-          boxShadow:
-            "0 14px 35px rgba(25, 89, 130, 0.10)",
+          transform: "translateY(-5px)",
+          boxShadow: "0 14px 35px rgba(25, 89, 130, 0.10)",
         },
       }}
     >
@@ -716,47 +629,29 @@ function FeatureCard({
   );
 }
 
-/*
- * ==========================
- * STEP CARD
- * ==========================
- */
-
 interface StepCardProps {
   number: string;
   title: string;
   description: string;
 }
 
-function StepCard({
-  number,
-  title,
-  description,
-}: StepCardProps) {
+function StepCard({ number, title, description }: StepCardProps) {
   return (
     <Paper
       variant="outlined"
       sx={{
         p: 4,
-
         borderRadius: 3,
-
         height: "100%",
-
         position: "relative",
       }}
     >
       <Typography
         sx={{
           fontSize: 48,
-
           fontWeight: 900,
-
-          color:
-            "rgba(22,135,201,0.15)",
-
+          color: "rgba(22,135,201,0.15)",
           lineHeight: 1,
-
           mb: 2,
         }}
       >
@@ -767,9 +662,7 @@ function StepCard({
         variant="h6"
         sx={{
           fontWeight: 800,
-
           color: "#14324a",
-
           mb: 1,
         }}
       >
@@ -779,7 +672,6 @@ function StepCard({
       <Typography
         sx={{
           color: "text.secondary",
-
           lineHeight: 1.8,
         }}
       >

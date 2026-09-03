@@ -92,7 +92,6 @@ export async function getDoctorAvailability(doctorId: number, date: string) {
     available: boolean;
   }[] = [];
 
-  // Giờ nghỉ trưa cố định của phòng khám
   const lunchStartMinutes = timeToMinutes("12:00");
   const lunchEndMinutes = timeToMinutes("13:00");
 
@@ -107,11 +106,6 @@ export async function getDoctorAvailability(doctorId: number, date: string) {
       current += schedule.slotDuration
     ) {
       const slotEndMinutes = current + schedule.slotDuration;
-
-      // ==========================
-      // BỎ QUA GIỜ NGHỈ TRƯA
-      // 12:00 - 13:00
-      // ==========================
 
       const overlapsLunch =
         current < lunchEndMinutes && slotEndMinutes > lunchStartMinutes;
@@ -128,17 +122,9 @@ export async function getDoctorAvailability(doctorId: number, date: string) {
 
       const slotEnd = createDateTime(date, end);
 
-      // ==========================
-      // KIỂM TRA BÁC SĨ ĐÃ CHẶN
-      // ==========================
-
       const isBlocked = blockedSlots.some((block) => {
         return slotStart < block.endAt && slotEnd > block.startAt;
       });
-
-      // ==========================
-      // KIỂM TRA ĐÃ CÓ LỊCH HẸN
-      // ==========================
 
       const isBooked = appointments.some((appointment) => {
         return slotStart < appointment.endAt && slotEnd > appointment.startAt;

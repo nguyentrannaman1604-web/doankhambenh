@@ -7,7 +7,6 @@ interface CreateReviewInput {
   comment?: string;
 }
 
-
 interface UpdateReviewInput {
   rating?: number;
   comment?: string;
@@ -53,7 +52,6 @@ export async function createReview(
     );
   }
 
-
   const existingReview =
     await prisma.review.findUnique({
       where: {
@@ -67,7 +65,6 @@ export async function createReview(
       409
     );
   }
-
 
   return prisma.$transaction(async (tx) => {
     const review = await tx.review.create({
@@ -141,8 +138,6 @@ export async function getDoctorReviews(
   });
 }
 
-
-
 export async function updateReview(
   patientId: number,
   reviewId: number,
@@ -169,7 +164,6 @@ export async function updateReview(
       403
     );
   }
-
 
   if (review.editCount >= 1) {
     throw new AppError(
@@ -203,7 +197,6 @@ export async function updateReview(
       400
     );
   }
-
 
   return prisma.$transaction(async (tx) => {
     const updatedReview = await tx.review.update({

@@ -51,10 +51,6 @@ function DoctorProfilePage() {
 
   const [success, setSuccess] = useState("");
 
-  // =========================
-  // LOAD PROFILE
-  // =========================
-
   const loadProfile = async () => {
     try {
       setLoading(true);
@@ -92,10 +88,6 @@ function DoctorProfilePage() {
     loadProfile();
   }, []);
 
-  // =========================
-  // HANDLE INPUT
-  // =========================
-
   const handleChange = (event: {
     target: {
       name: string;
@@ -110,10 +102,6 @@ function DoctorProfilePage() {
     }));
   };
 
-  // =========================
-  // SUBMIT
-  // =========================
-
   const handleSubmit = async (event: { preventDefault: () => void }) => {
     event.preventDefault();
 
@@ -122,19 +110,11 @@ function DoctorProfilePage() {
       setError("");
       setSuccess("");
 
-      // =========================
-      // VALIDATE NAME
-      // =========================
-
       if (formData.name.trim().length < 2) {
         setError("Tên phải có ít nhất 2 ký tự");
 
         return;
       }
-
-      // =========================
-      // UPDATE
-      // =========================
 
       const response = await updateDoctorProfile({
         name: formData.name.trim(),
@@ -162,10 +142,6 @@ function DoctorProfilePage() {
     }
   };
 
-  // =========================
-  // LOADING
-  // =========================
-
   if (loading) {
     return (
       <Box
@@ -183,10 +159,6 @@ function DoctorProfilePage() {
       </Box>
     );
   }
-
-  // =========================
-  // PROFILE NOT FOUND
-  // =========================
 
   if (!profile) {
     return (
@@ -217,10 +189,6 @@ function DoctorProfilePage() {
       }}
     >
       <Container maxWidth="lg">
-        {/* =========================
-            TITLE
-        ========================== */}
-
         <Typography
           variant="h4"
           sx={{
@@ -244,10 +212,6 @@ function DoctorProfilePage() {
           Xem và cập nhật thông tin cá nhân của bác sĩ.
         </Typography>
 
-        {/* =========================
-            ALERT
-        ========================== */}
-
         {error && (
           <Alert
             severity="error"
@@ -270,10 +234,6 @@ function DoctorProfilePage() {
           </Alert>
         )}
 
-        {/* =========================
-            MAIN GRID
-        ========================== */}
-
         <Box
           sx={{
             display: "grid",
@@ -286,10 +246,6 @@ function DoctorProfilePage() {
             gap: 3,
           }}
         >
-          {/* =========================
-              LEFT PROFILE CARD
-          ========================== */}
-
           <Paper
             elevation={0}
             sx={{
@@ -313,8 +269,6 @@ function DoctorProfilePage() {
                 alignItems: "center",
               }}
             >
-              {/* AVATAR */}
-
               <Avatar
                 src={formData.avatar || undefined}
                 sx={{
@@ -334,8 +288,6 @@ function DoctorProfilePage() {
                 {avatarLetter}
               </Avatar>
 
-              {/* NAME */}
-
               <Typography
                 variant="h6"
                 sx={{
@@ -349,8 +301,6 @@ function DoctorProfilePage() {
                 {formData.name}
               </Typography>
 
-              {/* EMAIL */}
-
               <Typography
                 sx={{
                   color: "text.secondary",
@@ -362,8 +312,6 @@ function DoctorProfilePage() {
               >
                 {profile.user.email}
               </Typography>
-
-              {/* ROLE */}
 
               <Chip
                 label="Bác sĩ"
@@ -378,8 +326,6 @@ function DoctorProfilePage() {
                   color: "#0877bd",
                 }}
               />
-
-              {/* SPECIALTIES */}
 
               {profile.specialties.length > 0 && (
                 <Box
@@ -402,10 +348,6 @@ function DoctorProfilePage() {
                 </Box>
               )}
             </Box>
-
-            {/* =========================
-                EXPERIENCE
-            ========================== */}
 
             <Box
               sx={{
@@ -455,10 +397,6 @@ function DoctorProfilePage() {
             </Box>
           </Paper>
 
-          {/* =========================
-              FORM
-          ========================== */}
-
           <Paper
             component="form"
             onSubmit={handleSubmit}
@@ -489,10 +427,6 @@ function DoctorProfilePage() {
               Thông tin cá nhân
             </Typography>
 
-            {/* =========================
-                FORM GRID
-            ========================== */}
-
             <Box
               sx={{
                 display: "grid",
@@ -505,8 +439,6 @@ function DoctorProfilePage() {
                 gap: 3,
               }}
             >
-              {/* NAME */}
-
               <TextField
                 label="Họ và tên"
                 name="name"
@@ -521,8 +453,6 @@ function DoctorProfilePage() {
                 }}
               />
 
-              {/* EMAIL */}
-
               <TextField
                 label="Email"
                 value={profile.user.email}
@@ -530,8 +460,6 @@ function DoctorProfilePage() {
                 fullWidth
                 helperText="Email tài khoản không thể tự thay đổi"
               />
-
-              {/* PHONE */}
 
               <TextField
                 label="Số điện thoại"
@@ -541,8 +469,6 @@ function DoctorProfilePage() {
                 fullWidth
                 placeholder="Ví dụ: 0901234567"
               />
-
-              {/* DATE OF BIRTH */}
 
               <TextField
                 label="Ngày sinh"
@@ -557,8 +483,6 @@ function DoctorProfilePage() {
                   },
                 }}
               />
-
-              {/* GENDER */}
 
               <TextField
                 select
@@ -577,8 +501,6 @@ function DoctorProfilePage() {
                 <MenuItem value="OTHER">Khác</MenuItem>
               </TextField>
 
-              {/* AVATAR */}
-
               <TextField
                 label="Ảnh đại diện"
                 name="avatar"
@@ -589,10 +511,6 @@ function DoctorProfilePage() {
                 helperText="Nhập URL hình ảnh đại diện"
               />
             </Box>
-
-            {/* =========================
-                AVATAR PREVIEW
-            ========================== */}
 
             {formData.avatar && (
               <Box
@@ -639,10 +557,6 @@ function DoctorProfilePage() {
               </Box>
             )}
 
-            {/* =========================
-                BIO
-            ========================== */}
-
             <TextField
               label="Giới thiệu bản thân"
               name="bio"
@@ -656,10 +570,6 @@ function DoctorProfilePage() {
               }}
               placeholder="Giới thiệu ngắn về chuyên môn và quá trình làm việc..."
             />
-
-            {/* =========================
-                SUBMIT
-            ========================== */}
 
             <Box
               sx={{

@@ -12,11 +12,8 @@ import {
 import api from "../../api/axiosClient";
 import type { LoginResponse } from "../../types/auth";
 import { useAuth } from "../../context/AuthContext";
-
 import { yupResolver } from "@hookform/resolvers/yup";
-
 import { loginSchema, type LoginFormData } from "../../schemas/authSchema";
-
 import { Link } from "react-router-dom";
 
 function LoginPage() {

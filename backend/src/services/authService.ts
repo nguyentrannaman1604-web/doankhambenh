@@ -7,7 +7,6 @@ import {
   verifyRefreshToken,
 } from "../utils/token.js";
 
-
 interface RegisterInput {
   name: string;
   email: string;

@@ -1,7 +1,4 @@
-
-
 import { useState } from "react";
-
 import {
   AppBar,
   Box,
@@ -38,9 +35,6 @@ function Navbar() {
 
   const [mobileOpen, setMobileOpen] = useState(false);
 
-  /*
-   * MENU PATIENT
-   */
   const patientMenu: MenuItem[] = [
     {
       label: "Trang chủ",
@@ -64,34 +58,25 @@ function Navbar() {
     },
   ];
 
-  /*
-   * MENU DOCTOR
-   */
-  /*
- * MENU DOCTOR
- */
-const doctorMenu: MenuItem[] = [
-  {
-    label: "Trang chủ",
-    path: "/doctor",
-  },
-  {
-    label: "Lịch làm việc",
-    path: "/doctor/schedules",
-  },
-  {
-    label: "Bệnh nhân hôm nay",
-    path: "/doctor/patients-today",
-  },
-  {
-    label: "Hồ sơ của tôi",
-    path: "/doctor/profile",
-  },
-];
+  const doctorMenu: MenuItem[] = [
+    {
+      label: "Trang chủ",
+      path: "/doctor",
+    },
+    {
+      label: "Lịch làm việc",
+      path: "/doctor/schedules",
+    },
+    {
+      label: "Bệnh nhân hôm nay",
+      path: "/doctor/patients-today",
+    },
+    {
+      label: "Hồ sơ của tôi",
+      path: "/doctor/profile",
+    },
+  ];
 
-  /*
-   * MENU ADMIN / RECEPTIONIST
-   */
   const adminMenu: MenuItem[] = [
     {
       label: "Tổng quan",
@@ -115,9 +100,6 @@ const doctorMenu: MenuItem[] = [
     },
   ];
 
-  /*
-   * CHỌN MENU THEO ROLE
-   */
   const getMenuItems = (): MenuItem[] => {
     if (!user) {
       return [];
@@ -140,9 +122,6 @@ const doctorMenu: MenuItem[] = [
 
   const menuItems = getMenuItems();
 
-  /*
-   * ĐĂNG XUẤT
-   */
   const handleLogout = () => {
     logout();
 
@@ -151,26 +130,13 @@ const doctorMenu: MenuItem[] = [
     navigate("/login");
   };
 
-  /*
-   * ĐIỀU HƯỚNG TRÊN MOBILE
-   */
   const handleMobileNavigate = (path: string) => {
     navigate(path);
 
     setMobileOpen(false);
   };
 
-  /*
-   * KIỂM TRA MENU ĐANG ACTIVE
-   */
   const isActive = (path: string) => {
-    /*
-     * Trang chủ phải khớp chính xác.
-     *
-     * Nếu không:
-     * /patient/doctors cũng sẽ làm
-     * /patient active.
-     */
     if (path === "/patient" || path === "/doctor" || path === "/admin") {
       return location.pathname === path;
     }
@@ -178,9 +144,6 @@ const doctorMenu: MenuItem[] = [
     return location.pathname.startsWith(path);
   };
 
-  /*
-   * ĐƯỜNG DẪN LOGO
-   */
   const getHomePath = () => {
     if (user?.role === "PATIENT") {
       return "/patient";
@@ -261,10 +224,6 @@ const doctorMenu: MenuItem[] = [
               PHÒNG KHÁM PANDA
             </Typography>
 
-            {/* =========================
-                MENU DESKTOP
-               ========================= */}
-
             <Box
               sx={{
                 display: {
@@ -310,10 +269,6 @@ const doctorMenu: MenuItem[] = [
                 );
               })}
             </Box>
-
-            {/* =========================
-                USER DESKTOP
-               ========================= */}
 
             <Box
               sx={{
@@ -364,10 +319,6 @@ const doctorMenu: MenuItem[] = [
               </Button>
             </Box>
 
-            {/* =========================
-                MOBILE / TABLET
-               ========================= */}
-
             <IconButton
               color="inherit"
               onClick={() => setMobileOpen(true)}
@@ -385,10 +336,6 @@ const doctorMenu: MenuItem[] = [
           </Toolbar>
         </Container>
       </AppBar>
-
-      {/* =============================
-          DRAWER MOBILE / TABLET
-         ============================= */}
 
       <Drawer
         anchor="right"
@@ -457,8 +404,6 @@ const doctorMenu: MenuItem[] = [
               </IconButton>
             </Box>
 
-            {/* USER */}
-
             <Typography
               sx={{
                 fontWeight: 600,
@@ -479,8 +424,6 @@ const doctorMenu: MenuItem[] = [
             </Typography>
           </Box>
 
-          {/* MENU */}
-
           <Box
             sx={{
               flex: 1,
@@ -499,9 +442,7 @@ const doctorMenu: MenuItem[] = [
 
                 px: 2,
               }}
-            >
-              
-            </Typography>
+            ></Typography>
 
             <List>
               {menuItems.map((item) => {
@@ -546,8 +487,6 @@ const doctorMenu: MenuItem[] = [
             </List>
           </Box>
 
-          {/* LOGOUT DƯỚI CÙNG */}
-
           <Box
             sx={{
               p: 2,
@@ -582,9 +521,6 @@ const doctorMenu: MenuItem[] = [
   );
 }
 
-/*
- * TÊN ROLE
- */
 function getRoleLabel(
   role: "PATIENT" | "DOCTOR" | "ADMIN" | "RECEPTIONIST" | undefined,
 ) {
@@ -606,9 +542,6 @@ function getRoleLabel(
   }
 }
 
-/*
- * STYLE MENU DESKTOP
- */
 const menuButtonStyle = {
   textTransform: "none",
 

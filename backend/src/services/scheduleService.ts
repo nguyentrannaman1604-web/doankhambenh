@@ -1,5 +1,3 @@
-
-
 import prisma from "../lib/prisma.js";
 import { AppError } from "../types/AppError.js";
 

@@ -1,17 +1,8 @@
 import * as yup from "yup";
-
-
-
 const emailRegex =
   /^[A-Za-z0-9](?:[A-Za-z0-9._%+-]*[A-Za-z0-9])?@[A-Za-z0-9](?:[A-Za-z0-9-]*[A-Za-z0-9])?(?:\.[A-Za-z]{2,})+$/;
-
-
-
 const vietnamPhoneRegex =
   /^(?:03[2-9]|05[2689]|07[06789]|08[1-689]|09[0-46-9])\d{7}$/;
-
-
-
 export const loginSchema = yup.object({
   email: yup
     .string()
@@ -25,11 +16,7 @@ export const loginSchema = yup.object({
     .required("Mật khẩu là bắt buộc")
     .min(6, "Mật khẩu phải có ít nhất 6 ký tự"),
 });
-
 export type LoginFormData = yup.InferType<typeof loginSchema>;
-
-
-
 export const registerSchema = yup.object({
   name: yup
     .string()

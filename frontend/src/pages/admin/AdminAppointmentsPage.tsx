@@ -1,8 +1,4 @@
-import {
-  useEffect,
-  useMemo,
-  useState,
-} from "react";
+import { useEffect, useMemo, useState } from "react";
 
 import {
   Alert,
@@ -24,9 +20,7 @@ import type {
   AppointmentStatus,
 } from "../../types/appointment";
 
-import type {
-  Doctor,
-} from "../../types/doctor";
+import type { Doctor } from "../../types/doctor";
 
 import {
   confirmAppointment,
@@ -34,332 +28,147 @@ import {
   staffCancelAppointment,
 } from "../../services/adminAppointmentService";
 
-import {
-  getDoctors,
-} from "../../services/doctorService";
+import { getDoctors } from "../../services/doctorService";
 
 function AdminAppointmentsPage() {
-  const [
-    appointments,
-    setAppointments,
-  ] = useState<
-    AdminAppointment[]
-  >([]);
+  const [appointments, setAppointments] = useState<AdminAppointment[]>([]);
 
-  const [
-    doctors,
-    setDoctors,
-  ] = useState<
-    Doctor[]
-  >([]);
+  const [doctors, setDoctors] = useState<Doctor[]>([]);
 
-  const [
-    doctorFilter,
-    setDoctorFilter,
-  ] = useState("");
+  const [doctorFilter, setDoctorFilter] = useState("");
 
-  const [
-    statusFilter,
-    setStatusFilter,
-  ] = useState("");
+  const [statusFilter, setStatusFilter] = useState("");
 
-  const [
-    dateFilter,
-    setDateFilter,
-  ] = useState("");
+  const [dateFilter, setDateFilter] = useState("");
 
-  const [
-    loading,
-    setLoading,
-  ] = useState(true);
+  const [loading, setLoading] = useState(true);
 
-  const [
-    actionId,
-    setActionId,
-  ] = useState<
-    number | null
-  >(null);
+  const [actionId, setActionId] = useState<number | null>(null);
 
-  const [
-    error,
-    setError,
-  ] = useState("");
+  const [error, setError] = useState("");
 
-  const [
-    success,
-    setSuccess,
-  ] = useState("");
+  const [success, setSuccess] = useState("");
 
-  /*
-   * ==========================
-   * LOAD DATA
-   * ==========================
-   */
+  const loadData = async () => {
+    try {
+      setLoading(true);
 
-  const loadData =
-    async () => {
-      try {
-        setLoading(true);
+      setError("");
 
-        setError("");
+      const [appointmentResponse, doctorResponse] = await Promise.all([
+        getAllAppointments(),
+        getDoctors(),
+      ]);
 
-        const [
-          appointmentResponse,
-          doctorResponse,
-        ] =
-          await Promise.all([
-            getAllAppointments(),
-            getDoctors(),
-          ]);
+      setAppointments(appointmentResponse.data);
 
-        setAppointments(
-          appointmentResponse.data
-        );
+      setDoctors(doctorResponse.data);
+    } catch (error) {
+      console.error("Load admin appointments error:", error);
 
-        setDoctors(
-          doctorResponse.data
-        );
-      } catch (error) {
-        console.error(
-          "Load admin appointments error:",
-          error
-        );
-
-        setError(
-          "Không thể tải dữ liệu lịch hẹn"
-        );
-      } finally {
-        setLoading(false);
-      }
-    };
+      setError("Không thể tải dữ liệu lịch hẹn");
+    } finally {
+      setLoading(false);
+    }
+  };
 
   useEffect(() => {
     loadData();
   }, []);
 
-  /*
-   * ==========================
-   * SẮP XẾP DANH SÁCH BÁC SĨ
-   * ==========================
-   */
+  const sortedDoctors = useMemo(() => {
+    return [...doctors].sort((a, b) =>
+      a.user.name.localeCompare(b.user.name, "vi"),
+    );
+  }, [doctors]);
 
-  const sortedDoctors =
-    useMemo(() => {
-      return [...doctors].sort(
-        (a, b) =>
-          a.user.name.localeCompare(
-            b.user.name,
-            "vi"
-          )
-      );
-    }, [doctors]);
+  const filteredAppointments = useMemo(() => {
+    return appointments
+      .filter((appointment) => {
+        const matchDoctor =
+          !doctorFilter || appointment.doctorId === Number(doctorFilter);
 
-  /*
-   * ==========================
-   * FILTER APPOINTMENTS
-   * ==========================
-   */
+        const matchStatus =
+          !statusFilter || appointment.status === statusFilter;
 
-  const filteredAppointments =
-    useMemo(() => {
-      return appointments
-        .filter(
-          (
-            appointment
-          ) => {
-            const matchDoctor =
-              !doctorFilter ||
-              appointment.doctorId ===
-                Number(
-                  doctorFilter
-                );
+        const appointmentDate = dayjs(appointment.startAt).format("YYYY-MM-DD");
 
-            const matchStatus =
-              !statusFilter ||
-              appointment.status ===
-                statusFilter;
+        const matchDate = !dateFilter || appointmentDate === dateFilter;
 
-            const appointmentDate =
-              dayjs(
-                appointment.startAt
-              ).format(
-                "YYYY-MM-DD"
-              );
+        return matchDoctor && matchStatus && matchDate;
+      })
+      .sort((a, b) => dayjs(b.startAt).valueOf() - dayjs(a.startAt).valueOf());
+  }, [appointments, doctorFilter, statusFilter, dateFilter]);
 
-            const matchDate =
-              !dateFilter ||
-              appointmentDate ===
-                dateFilter;
+  const handleConfirm = async (appointmentId: number) => {
+    const confirmed = window.confirm("Xác nhận lịch hẹn này?");
 
-            return (
-              matchDoctor &&
-              matchStatus &&
-              matchDate
-            );
-          }
-        )
-        .sort(
-          (a, b) =>
-            dayjs(
-              b.startAt
-            ).valueOf() -
-            dayjs(
-              a.startAt
-            ).valueOf()
+    if (!confirmed) {
+      return;
+    }
+
+    try {
+      setActionId(appointmentId);
+
+      setError("");
+      setSuccess("");
+
+      await confirmAppointment(appointmentId);
+
+      setSuccess("Xác nhận lịch hẹn thành công");
+
+      await loadData();
+    } catch (error: unknown) {
+      console.error("Confirm appointment error:", error);
+
+      if (axios.isAxiosError(error)) {
+        setError(
+          error.response?.data?.message || "Không thể xác nhận lịch hẹn",
         );
-    }, [
-      appointments,
-      doctorFilter,
-      statusFilter,
-      dateFilter,
-    ]);
-
-  /*
-   * ==========================
-   * XÁC NHẬN LỊCH
-   * ==========================
-   */
-
-  const handleConfirm =
-    async (
-      appointmentId: number
-    ) => {
-      const confirmed =
-        window.confirm(
-          "Xác nhận lịch hẹn này?"
-        );
-
-      if (!confirmed) {
-        return;
+      } else {
+        setError("Không thể xác nhận lịch hẹn");
       }
+    } finally {
+      setActionId(null);
+    }
+  };
 
-      try {
-        setActionId(
-          appointmentId
-        );
+  const handleCancel = async (appointmentId: number) => {
+    const confirmed = window.confirm("Bạn có chắc muốn hủy lịch hẹn này?");
 
-        setError("");
-        setSuccess("");
+    if (!confirmed) {
+      return;
+    }
 
-        await confirmAppointment(
-          appointmentId
-        );
+    try {
+      setActionId(appointmentId);
 
-        setSuccess(
-          "Xác nhận lịch hẹn thành công"
-        );
+      setError("");
+      setSuccess("");
 
-        await loadData();
-      } catch (
-        error: unknown
-      ) {
-        console.error(
-          "Confirm appointment error:",
-          error
-        );
+      await staffCancelAppointment(appointmentId);
 
-        if (
-          axios.isAxiosError(
-            error
-          )
-        ) {
-          setError(
-            error.response
-              ?.data
-              ?.message ||
-              "Không thể xác nhận lịch hẹn"
-          );
-        } else {
-          setError(
-            "Không thể xác nhận lịch hẹn"
-          );
-        }
-      } finally {
-        setActionId(
-          null
-        );
+      setSuccess("Hủy lịch hẹn thành công");
+
+      await loadData();
+    } catch (error: unknown) {
+      console.error("Staff cancel error:", error);
+
+      if (axios.isAxiosError(error)) {
+        setError(error.response?.data?.message || "Không thể hủy lịch hẹn");
+      } else {
+        setError("Không thể hủy lịch hẹn");
       }
-    };
+    } finally {
+      setActionId(null);
+    }
+  };
 
-  /*
-   * ==========================
-   * HỦY LỊCH
-   * ==========================
-   */
-
-  const handleCancel =
-    async (
-      appointmentId: number
-    ) => {
-      const confirmed =
-        window.confirm(
-          "Bạn có chắc muốn hủy lịch hẹn này?"
-        );
-
-      if (!confirmed) {
-        return;
-      }
-
-      try {
-        setActionId(
-          appointmentId
-        );
-
-        setError("");
-        setSuccess("");
-
-        await staffCancelAppointment(
-          appointmentId
-        );
-
-        setSuccess(
-          "Hủy lịch hẹn thành công"
-        );
-
-        await loadData();
-      } catch (
-        error: unknown
-      ) {
-        console.error(
-          "Staff cancel error:",
-          error
-        );
-
-        if (
-          axios.isAxiosError(
-            error
-          )
-        ) {
-          setError(
-            error.response
-              ?.data
-              ?.message ||
-              "Không thể hủy lịch hẹn"
-          );
-        } else {
-          setError(
-            "Không thể hủy lịch hẹn"
-          );
-        }
-      } finally {
-        setActionId(
-          null
-        );
-      }
-    };
-
-  /*
-   * ==========================
-   * XÓA FILTER
-   * ==========================
-   */
-
-  const handleClearFilters =
-    () => {
-      setDoctorFilter("");
-      setStatusFilter("");
-      setDateFilter("");
-    };
+  const handleClearFilters = () => {
+    setDoctorFilter("");
+    setStatusFilter("");
+    setDateFilter("");
+  };
 
   return (
     <Box>
@@ -391,13 +200,10 @@ function AdminAppointmentsPage() {
 
         <Typography
           sx={{
-            color:
-              "text.secondary",
+            color: "text.secondary",
           }}
         >
-          Theo dõi và xử lý lịch
-          khám tại PHÒNG KHÁM
-          PANDA.
+          Theo dõi và xử lý lịch khám tại PHÒNG KHÁM PANDA.
         </Typography>
       </Box>
 
@@ -455,17 +261,14 @@ function AdminAppointmentsPage() {
             gridTemplateColumns: {
               xs: "1fr",
 
-              sm:
-                "repeat(2, 1fr)",
+              sm: "repeat(2, 1fr)",
 
-              lg:
-                "repeat(4, 1fr)",
+              lg: "repeat(4, 1fr)",
             },
 
             gap: 2,
 
-            alignItems:
-              "center",
+            alignItems: "center",
           }}
         >
           {/* BÁC SĨ */}
@@ -474,40 +277,16 @@ function AdminAppointmentsPage() {
             select
             fullWidth
             label="Bác sĩ"
-            value={
-              doctorFilter
-            }
-            onChange={(
-              event
-            ) =>
-              setDoctorFilter(
-                event.target.value
-              )
-            }
+            value={doctorFilter}
+            onChange={(event) => setDoctorFilter(event.target.value)}
           >
-            <MenuItem value="">
-              Tất cả bác sĩ
-            </MenuItem>
+            <MenuItem value="">Tất cả bác sĩ</MenuItem>
 
-            {sortedDoctors.map(
-              (doctor) => (
-                <MenuItem
-                  key={
-                    doctor.id
-                  }
-                  value={
-                    String(
-                      doctor.id
-                    )
-                  }
-                >
-                  {
-                    doctor.user
-                      .name
-                  }
-                </MenuItem>
-              )
-            )}
+            {sortedDoctors.map((doctor) => (
+              <MenuItem key={doctor.id} value={String(doctor.id)}>
+                {doctor.user.name}
+              </MenuItem>
+            ))}
           </TextField>
 
           {/* NGÀY */}
@@ -516,16 +295,8 @@ function AdminAppointmentsPage() {
             fullWidth
             label="Ngày khám"
             type="date"
-            value={
-              dateFilter
-            }
-            onChange={(
-              event
-            ) =>
-              setDateFilter(
-                event.target.value
-              )
-            }
+            value={dateFilter}
+            onChange={(event) => setDateFilter(event.target.value)}
             slotProps={{
               inputLabel: {
                 shrink: true,
@@ -533,54 +304,29 @@ function AdminAppointmentsPage() {
             }}
           />
 
-          {/* TRẠNG THÁI */}
-
           <TextField
             select
             fullWidth
             label="Trạng thái"
-            value={
-              statusFilter
-            }
-            onChange={(
-              event
-            ) =>
-              setStatusFilter(
-                event.target.value
-              )
-            }
+            value={statusFilter}
+            onChange={(event) => setStatusFilter(event.target.value)}
           >
-            <MenuItem value="">
-              Tất cả trạng thái
-            </MenuItem>
+            <MenuItem value="">Tất cả trạng thái</MenuItem>
 
-            <MenuItem value="PENDING">
-              Chờ xác nhận
-            </MenuItem>
+            <MenuItem value="PENDING">Chờ xác nhận</MenuItem>
 
-            <MenuItem value="CONFIRMED">
-              Đã xác nhận
-            </MenuItem>
+            <MenuItem value="CONFIRMED">Đã xác nhận</MenuItem>
 
-            <MenuItem value="COMPLETED">
-              Đã khám
-            </MenuItem>
+            <MenuItem value="COMPLETED">Đã khám</MenuItem>
 
-            <MenuItem value="CANCELLED">
-              Đã hủy
-            </MenuItem>
+            <MenuItem value="CANCELLED">Đã hủy</MenuItem>
           </TextField>
-
-          {/* XÓA FILTER */}
 
           <Button
             variant="outlined"
-            onClick={
-              handleClearFilters
-            }
+            onClick={handleClearFilters}
             sx={{
-              textTransform:
-                "none",
+              textTransform: "none",
 
               minHeight: 56,
             }}
@@ -590,26 +336,15 @@ function AdminAppointmentsPage() {
         </Box>
       </Paper>
 
-      {/* SỐ KẾT QUẢ */}
-
       <Typography
         sx={{
-          color:
-            "text.secondary",
+          color: "text.secondary",
 
           mb: 2,
         }}
       >
-        Tìm thấy{" "}
-        <strong>
-          {
-            filteredAppointments.length
-          }
-        </strong>{" "}
-        lịch hẹn
+        Tìm thấy <strong>{filteredAppointments.length}</strong> lịch hẹn
       </Typography>
-
-      {/* DANH SÁCH */}
 
       {loading ? (
         <Box
@@ -618,17 +353,14 @@ function AdminAppointmentsPage() {
 
             display: "flex",
 
-            justifyContent:
-              "center",
+            justifyContent: "center",
 
-            alignItems:
-              "center",
+            alignItems: "center",
           }}
         >
           <CircularProgress />
         </Box>
-      ) : filteredAppointments.length ===
-        0 ? (
+      ) : filteredAppointments.length === 0 ? (
         <Paper
           variant="outlined"
           sx={{
@@ -637,8 +369,7 @@ function AdminAppointmentsPage() {
               sm: 5,
             },
 
-            textAlign:
-              "center",
+            textAlign: "center",
 
             borderRadius: 3,
           }}
@@ -651,19 +382,15 @@ function AdminAppointmentsPage() {
               mb: 1,
             }}
           >
-            Không tìm thấy lịch
-            hẹn
+            Không tìm thấy lịch hẹn
           </Typography>
 
           <Typography
             sx={{
-              color:
-                "text.secondary",
+              color: "text.secondary",
             }}
           >
-            Không có lịch hẹn nào
-            phù hợp với bộ lọc hiện
-            tại.
+            Không có lịch hẹn nào phù hợp với bộ lọc hiện tại.
           </Typography>
         </Paper>
       ) : (
@@ -671,36 +398,20 @@ function AdminAppointmentsPage() {
           sx={{
             display: "flex",
 
-            flexDirection:
-              "column",
+            flexDirection: "column",
 
             gap: 2,
           }}
         >
-          {filteredAppointments.map(
-            (
-              appointment
-            ) => (
-              <AppointmentCard
-                key={
-                  appointment.id
-                }
-                appointment={
-                  appointment
-                }
-                processing={
-                  actionId ===
-                  appointment.id
-                }
-                onConfirm={
-                  handleConfirm
-                }
-                onCancel={
-                  handleCancel
-                }
-              />
-            )
-          )}
+          {filteredAppointments.map((appointment) => (
+            <AppointmentCard
+              key={appointment.id}
+              appointment={appointment}
+              processing={actionId === appointment.id}
+              onConfirm={handleConfirm}
+              onCancel={handleCancel}
+            />
+          ))}
         </Box>
       )}
     </Box>
@@ -708,18 +419,13 @@ function AdminAppointmentsPage() {
 }
 
 interface AppointmentCardProps {
-  appointment:
-    AdminAppointment;
+  appointment: AdminAppointment;
 
   processing: boolean;
 
-  onConfirm: (
-    id: number
-  ) => void;
+  onConfirm: (id: number) => void;
 
-  onCancel: (
-    id: number
-  ) => void;
+  onCancel: (id: number) => void;
 }
 
 function AppointmentCard({
@@ -728,15 +434,10 @@ function AppointmentCard({
   onConfirm,
   onCancel,
 }: AppointmentCardProps) {
-  const canConfirm =
-    appointment.status ===
-    "PENDING";
+  const canConfirm = appointment.status === "PENDING";
 
   const canCancel =
-    appointment.status ===
-      "PENDING" ||
-    appointment.status ===
-      "CONFIRMED";
+    appointment.status === "PENDING" || appointment.status === "CONFIRMED";
 
   return (
     <Paper
@@ -757,28 +458,22 @@ function AppointmentCard({
           gridTemplateColumns: {
             xs: "1fr",
 
-            md:
-              "1.2fr 1.2fr 1fr auto",
+            md: "1.2fr 1.2fr 1fr auto",
           },
 
           gap: 3,
 
-          alignItems:
-            "center",
+          alignItems: "center",
         }}
       >
-        {/* BỆNH NHÂN */}
-
         <Box>
           <Typography
             sx={{
-              color:
-                "text.secondary",
+              color: "text.secondary",
 
               mb: 0.5,
 
-              fontSize:
-                "0.875rem",
+              fontSize: "0.875rem",
             }}
           >
             Bệnh nhân
@@ -791,51 +486,33 @@ function AppointmentCard({
               mb: 0.5,
             }}
           >
-            {
-              appointment.patient
-                .name
-            }
+            {appointment.patient.name}
           </Typography>
 
-          <Typography
-            variant="body2"
-          >
-            {
-              appointment.patient
-                .phone ||
-              "Chưa cập nhật SĐT"
-            }
+          <Typography variant="body2">
+            {appointment.patient.phone || "Chưa cập nhật SĐT"}
           </Typography>
 
           <Typography
             variant="body2"
             sx={{
-              color:
-                "text.secondary",
+              color: "text.secondary",
 
-              overflowWrap:
-                "anywhere",
+              overflowWrap: "anywhere",
             }}
           >
-            {
-              appointment.patient
-                .email
-            }
+            {appointment.patient.email}
           </Typography>
         </Box>
-
-        {/* BÁC SĨ */}
 
         <Box>
           <Typography
             sx={{
-              color:
-                "text.secondary",
+              color: "text.secondary",
 
               mb: 0.5,
 
-              fontSize:
-                "0.875rem",
+              fontSize: "0.875rem",
             }}
           >
             Bác sĩ
@@ -848,24 +525,13 @@ function AppointmentCard({
               mb: 0.5,
             }}
           >
-            {
-              appointment.doctor
-                .user.name
-            }
+            {appointment.doctor.user.name}
           </Typography>
 
-          <Typography
-            variant="body2"
-          >
-            {
-              appointment.doctor
-                .user.phone ||
-              "Chưa cập nhật SĐT"
-            }
+          <Typography variant="body2">
+            {appointment.doctor.user.phone || "Chưa cập nhật SĐT"}
           </Typography>
         </Box>
-
-        {/* THỜI GIAN */}
 
         <Box>
           <Typography
@@ -875,11 +541,7 @@ function AppointmentCard({
               mb: 0.5,
             }}
           >
-            {dayjs(
-              appointment.startAt
-            ).format(
-              "DD/MM/YYYY"
-            )}
+            {dayjs(appointment.startAt).format("DD/MM/YYYY")}
           </Typography>
 
           <Typography
@@ -887,22 +549,14 @@ function AppointmentCard({
               mb: 1,
             }}
           >
-            {dayjs(
-              appointment.startAt
-            ).format("HH:mm")}
+            {dayjs(appointment.startAt).format("HH:mm")}
 
             {" - "}
 
-            {dayjs(
-              appointment.endAt
-            ).format("HH:mm")}
+            {dayjs(appointment.endAt).format("HH:mm")}
           </Typography>
 
-          <StatusChip
-            status={
-              appointment.status
-            }
-          />
+          <StatusChip status={appointment.status} />
 
           {appointment.reason && (
             <Typography
@@ -910,26 +564,19 @@ function AppointmentCard({
               sx={{
                 mt: 1,
 
-                color:
-                  "text.secondary",
+                color: "text.secondary",
               }}
             >
-              Lý do:{" "}
-              {
-                appointment.reason
-              }
+              Lý do: {appointment.reason}
             </Typography>
           )}
         </Box>
-
-        {/* ACTION */}
 
         <Box
           sx={{
             display: "flex",
 
-            flexDirection:
-              "column",
+            flexDirection: "column",
 
             gap: 1,
 
@@ -941,22 +588,13 @@ function AppointmentCard({
           {canConfirm && (
             <Button
               variant="contained"
-              disabled={
-                processing
-              }
-              onClick={() =>
-                onConfirm(
-                  appointment.id
-                )
-              }
+              disabled={processing}
+              onClick={() => onConfirm(appointment.id)}
               sx={{
-                textTransform:
-                  "none",
+                textTransform: "none",
               }}
             >
-              {processing
-                ? "Đang xử lý..."
-                : "Xác nhận"}
+              {processing ? "Đang xử lý..." : "Xác nhận"}
             </Button>
           )}
 
@@ -964,22 +602,13 @@ function AppointmentCard({
             <Button
               variant="outlined"
               color="error"
-              disabled={
-                processing
-              }
-              onClick={() =>
-                onCancel(
-                  appointment.id
-                )
-              }
+              disabled={processing}
+              onClick={() => onCancel(appointment.id)}
               sx={{
-                textTransform:
-                  "none",
+                textTransform: "none",
               }}
             >
-              {processing
-                ? "Đang xử lý..."
-                : "Hủy lịch"}
+              {processing ? "Đang xử lý..." : "Hủy lịch"}
             </Button>
           )}
         </Box>
@@ -988,47 +617,19 @@ function AppointmentCard({
   );
 }
 
-function StatusChip({
-  status,
-}: {
-  status:
-    AppointmentStatus;
-}) {
+function StatusChip({ status }: { status: AppointmentStatus }) {
   switch (status) {
     case "PENDING":
-      return (
-        <Chip
-          label="Chờ xác nhận"
-          color="warning"
-          size="small"
-        />
-      );
+      return <Chip label="Chờ xác nhận" color="warning" size="small" />;
 
     case "CONFIRMED":
-      return (
-        <Chip
-          label="Đã xác nhận"
-          color="primary"
-          size="small"
-        />
-      );
+      return <Chip label="Đã xác nhận" color="primary" size="small" />;
 
     case "COMPLETED":
-      return (
-        <Chip
-          label="Đã khám"
-          color="success"
-          size="small"
-        />
-      );
+      return <Chip label="Đã khám" color="success" size="small" />;
 
     case "CANCELLED":
-      return (
-        <Chip
-          label="Đã hủy"
-          size="small"
-        />
-      );
+      return <Chip label="Đã hủy" size="small" />;
 
     default:
       return null;

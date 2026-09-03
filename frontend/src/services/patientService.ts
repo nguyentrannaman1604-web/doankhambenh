@@ -1,9 +1,7 @@
 import api from "../api/axiosClient";
-
 import type {
   PatientProfileResponse,
 } from "../types/patient";
-
 import type {
   PatientProfileFormData,
 } from "../schemas/patientSchema";

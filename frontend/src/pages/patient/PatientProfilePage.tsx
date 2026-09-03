@@ -1,9 +1,6 @@
 import { useEffect, useState } from "react";
-
 import { useForm } from "react-hook-form";
-
 import { yupResolver } from "@hookform/resolvers/yup";
-
 import {
   Alert,
   Box,
@@ -14,23 +11,18 @@ import {
   TextField,
   Typography,
 } from "@mui/material";
-
 import dayjs from "dayjs";
-
 import axios from "axios";
-
 import {
   patientProfileSchema,
   type PatientProfileFormData,
 } from "../../schemas/patientSchema";
-
 import {
   getPatientProfile,
   updatePatientProfile,
 } from "../../services/patientService";
 
 import { useAuth } from "../../context/AuthContext";
-
 function PatientProfilePage() {
   const { updateUser } = useAuth();
 
@@ -51,9 +43,6 @@ function PatientProfilePage() {
     resolver: yupResolver(patientProfileSchema),
   });
 
-  /*
-   * LOAD HỒ SƠ
-   */
   useEffect(() => {
     const loadProfile = async () => {
       try {
@@ -92,38 +81,18 @@ function PatientProfilePage() {
     loadProfile();
   }, [reset]);
 
-  /*
-   * CẬP NHẬT HỒ SƠ
-   */
   const onSubmit = async (data: PatientProfileFormData) => {
     try {
       setMessage("");
-
-      /*
-       * Gọi backend PATCH /profile
-       */
       const response = await updatePatientProfile(data);
-
-      /*
-       * Profile mới backend trả về
-       */
       const updatedProfile = response.data;
 
-      /*
-       * Cập nhật AuthContext
-       *
-       * Navbar đang dùng user?.name
-       * nên tên sẽ thay đổi ngay.
-       */
       updateUser({
         name: updatedProfile.name,
 
         phone: updatedProfile.phone,
       });
 
-      /*
-       * Reset lại form theo dữ liệu mới
-       */
       reset({
         name: updatedProfile.name || "",
 
@@ -152,9 +121,6 @@ function PatientProfilePage() {
     }
   };
 
-  /*
-   * LOADING
-   */
   if (loading) {
     return (
       <Box
@@ -231,8 +197,6 @@ function PatientProfilePage() {
           Cập nhật thông tin cá nhân của bạn
         </Typography>
 
-        {/* MESSAGE */}
-
         {message && (
           <Alert
             severity={success ? "success" : "error"}
@@ -243,8 +207,6 @@ function PatientProfilePage() {
             {message}
           </Alert>
         )}
-
-        {/* FORM */}
 
         <Box component="form" onSubmit={handleSubmit(onSubmit)}>
           {/* HỌ TÊN */}
@@ -264,8 +226,6 @@ function PatientProfilePage() {
             }}
           />
 
-          {/* EMAIL */}
-
           <TextField
             label="Email"
             value={email}
@@ -273,8 +233,6 @@ function PatientProfilePage() {
             margin="normal"
             disabled
           />
-
-          {/* PHONE */}
 
           <TextField
             label="Số điện thoại"
@@ -284,8 +242,6 @@ function PatientProfilePage() {
             error={!!errors.phone}
             helperText={errors.phone?.message}
           />
-
-          {/* NGÀY SINH */}
 
           <TextField
             label="Ngày sinh"
@@ -306,8 +262,6 @@ function PatientProfilePage() {
             helperText={errors.dateOfBirth?.message}
           />
 
-          {/* GIỚI TÍNH */}
-
           <TextField
             select
             label="Giới tính"
@@ -326,8 +280,6 @@ function PatientProfilePage() {
 
             <MenuItem value="OTHER">Khác</MenuItem>
           </TextField>
-
-          {/* SUBMIT */}
 
           <Button
             type="submit"
