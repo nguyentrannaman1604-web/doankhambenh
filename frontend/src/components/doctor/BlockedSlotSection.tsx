@@ -1,4 +1,4 @@
-import { useEffect, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 
 import {
   Alert,
@@ -22,16 +22,21 @@ import {
   type BlockedSlotFormData,
 } from "../../schemas/blockedSlotSchema";
 
-import type { BlockedSlot } from "../../types/schedule";
+import type { BlockedSlot, DoctorSchedule } from "../../types/schedule";
 
 import {
   createBlockedSlot,
   deleteBlockedSlot,
   getMyBlockedSlots,
+  getMyDoctorSchedules,
 } from "../../services/doctorScheduleService";
 
 function BlockedSlotSection() {
   const [blockedSlots, setBlockedSlots] = useState<BlockedSlot[]>([]);
+
+  const [workingSchedules, setWorkingSchedules] = useState<DoctorSchedule[]>(
+    [],
+  );
 
   const [loading, setLoading] = useState(true);
 
@@ -45,6 +50,7 @@ function BlockedSlotSection() {
     control,
     handleSubmit,
     reset,
+    watch,
     formState: { errors, isSubmitting },
   } = useForm<BlockedSlotFormData>({
     resolver: yupResolver(blockedSlotSchema),
@@ -57,36 +63,137 @@ function BlockedSlotSection() {
     },
   });
 
+  const selectedDate = watch("date");
+
   const loadBlockedSlots = async () => {
     try {
-      setLoading(true);
-      setError("");
-
       const response = await getMyBlockedSlots();
 
       setBlockedSlots(response.data);
     } catch (error) {
       console.error("Load blocked slots error:", error);
 
-      setError("Không thể tải thời gian đã chặn");
-    } finally {
-      setLoading(false);
+      throw error;
+    }
+  };
+
+  const loadWorkingSchedules = async () => {
+    try {
+      const response = await getMyDoctorSchedules();
+
+      setWorkingSchedules(response.data);
+    } catch (error) {
+      console.error("Load working schedules error:", error);
+
+      throw error;
     }
   };
 
   useEffect(() => {
-    loadBlockedSlots();
+    const loadData = async () => {
+      try {
+        setLoading(true);
+        setError("");
+
+        await Promise.all([loadBlockedSlots(), loadWorkingSchedules()]);
+      } catch (error) {
+        console.error("Load blocked slot section error:", error);
+
+        setError("Không thể tải dữ liệu lịch làm việc");
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    loadData();
   }, []);
+
+  const selectedDaySchedules = useMemo(() => {
+    if (!selectedDate) {
+      return [];
+    }
+
+    const selectedDay = dayjs(selectedDate).day();
+
+    return workingSchedules
+      .filter(
+        (schedule) => schedule.dayOfWeek === selectedDay && schedule.isActive,
+      )
+      .sort((a, b) => a.startTime.localeCompare(b.startTime));
+  }, [selectedDate, workingSchedules]);
+
+  const minimumStartTime =
+    selectedDate === dayjs().format("YYYY-MM-DD")
+      ? dayjs().add(1, "hour").format("HH:mm")
+      : undefined;
 
   const onSubmit = async (data: BlockedSlotFormData) => {
     try {
       setError("");
       setSuccess("");
-      const startAt = new Date(
-        `${data.date}T${data.startTime}:00`,
-      ).toISOString();
 
-      const endAt = new Date(`${data.date}T${data.endTime}:00`).toISOString();
+      const startDateTime = new Date(`${data.date}T${data.startTime}:00`);
+
+      const endDateTime = new Date(`${data.date}T${data.endTime}:00`);
+
+      if (
+        Number.isNaN(startDateTime.getTime()) ||
+        Number.isNaN(endDateTime.getTime())
+      ) {
+        setError("Ngày giờ không hợp lệ");
+
+        return;
+      }
+
+      if (startDateTime >= endDateTime) {
+        setError("Thời gian bắt đầu phải trước thời gian kết thúc");
+
+        return;
+      }
+
+      const now = new Date();
+
+      if (startDateTime <= now) {
+        setError("Không thể chặn thời gian trong quá khứ");
+
+        return;
+      }
+
+      const oneHourLater = new Date(now.getTime() + 60 * 60 * 1000);
+
+      if (startDateTime < oneHourLater) {
+        setError("Bạn phải chặn lịch trước ít nhất 1 giờ");
+
+        return;
+      }
+
+      const selectedDay = dayjs(data.date).day();
+
+      const activeSchedules = workingSchedules.filter(
+        (schedule) => schedule.dayOfWeek === selectedDay && schedule.isActive,
+      );
+
+      if (activeSchedules.length === 0) {
+        setError("Bạn không có lịch làm việc trong ngày này");
+
+        return;
+      }
+
+      const isInsideWorkingSchedule = activeSchedules.some(
+        (schedule) =>
+          schedule.startTime <= data.startTime &&
+          schedule.endTime >= data.endTime,
+      );
+
+      if (!isInsideWorkingSchedule) {
+        setError("Khoảng thời gian chặn phải nằm trong giờ làm việc của bạn");
+
+        return;
+      }
+
+      const startAt = startDateTime.toISOString();
+
+      const endAt = endDateTime.toISOString();
 
       await createBlockedSlot({
         startAt,
@@ -201,21 +308,64 @@ function BlockedSlotSection() {
           variant="h6"
           sx={{
             fontWeight: 700,
-            mb: 3,
+            mb: 2,
           }}
         >
           Chặn thời gian
         </Typography>
+
+        <Alert
+          severity="info"
+          sx={{
+            mb: 3,
+          }}
+        >
+          Chỉ được chặn trong giờ làm việc của bạn và phải báo trước ít nhất 1
+          giờ. Nếu đã có bệnh nhân đặt lịch trong khoảng này, hệ thống sẽ không
+          cho phép chặn.
+        </Alert>
+
+        {selectedDate && selectedDaySchedules.length === 0 && (
+          <Alert
+            severity="warning"
+            sx={{
+              mb: 3,
+            }}
+          >
+            Bạn không có lịch làm việc trong ngày đã chọn.
+          </Alert>
+        )}
+
+        {selectedDate && selectedDaySchedules.length > 0 && (
+          <Alert
+            severity="success"
+            sx={{
+              mb: 3,
+            }}
+          >
+            Lịch làm việc ngày này:{" "}
+            <strong>
+              {selectedDaySchedules
+                .map(
+                  (schedule) => `${schedule.startTime} - ${schedule.endTime}`,
+                )
+                .join(", ")}
+            </strong>
+          </Alert>
+        )}
 
         <Box
           component="form"
           onSubmit={handleSubmit(onSubmit)}
           sx={{
             display: "grid",
+
             gridTemplateColumns: {
               xs: "1fr",
+
               md: "repeat(3, 1fr)",
             },
+
             gap: 2,
           }}
         >
@@ -233,6 +383,10 @@ function BlockedSlotSection() {
                 slotProps={{
                   inputLabel: {
                     shrink: true,
+                  },
+
+                  htmlInput: {
+                    min: dayjs().format("YYYY-MM-DD"),
                   },
                 }}
                 sx={{
@@ -258,6 +412,10 @@ function BlockedSlotSection() {
                 slotProps={{
                   inputLabel: {
                     shrink: true,
+                  },
+
+                  htmlInput: {
+                    min: minimumStartTime,
                   },
                 }}
                 sx={{
@@ -317,9 +475,10 @@ function BlockedSlotSection() {
           <Button
             type="submit"
             variant="contained"
-            disabled={isSubmitting}
+            disabled={isSubmitting || selectedDaySchedules.length === 0}
             sx={{
               textTransform: "none",
+
               minHeight: 56,
             }}
           >
@@ -362,16 +521,21 @@ function BlockedSlotSection() {
               <Box
                 sx={{
                   p: 3,
+
                   display: "flex",
+
                   flexDirection: {
                     xs: "column",
                     md: "row",
                   },
+
                   justifyContent: "space-between",
+
                   alignItems: {
                     xs: "flex-start",
                     md: "center",
                   },
+
                   gap: 2,
                 }}
               >
@@ -379,6 +543,7 @@ function BlockedSlotSection() {
                   <Typography
                     sx={{
                       fontWeight: 700,
+
                       mb: 0.5,
                     }}
                   >
@@ -396,6 +561,7 @@ function BlockedSlotSection() {
                   <Typography
                     sx={{
                       color: "text.secondary",
+
                       mt: 0.5,
                     }}
                   >
